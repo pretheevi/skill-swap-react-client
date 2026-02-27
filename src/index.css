@@ -1,0 +1,97 @@
+:root {
+  /* =========================
+     BRAND COLORS
+  ========================== */
+
+  /* Primary brand purple */
+  --color-purple-600: #5955b3;
+  --color-purple-500: #7a72c1;
+  --color-purple-100: #ecebfa;
+
+  /* Pink accents (Pinterest aesthetic 💖) */
+  --color-pink-500: #e8a6c3;   /* main accent */
+  --color-pink-300: #f3c6d9;   /* light bg */
+  --color-pink-700: #cc7fa4;   /* hover / emphasis */
+
+  /* Leaf green accent 🍃 */
+  --color-green-500: #8fb9a8;
+  --color-green-300: #cfe5dc;
+  --color-green-700: #5f8f7b;
+
+  /* =========================
+     BACKGROUNDS
+  ========================== */
+
+  --bg-app: var(--color-purple-600);
+  --bg-surface: #ffffff;
+  --bg-surface-alt: #f6f6f6;
+
+  --bg-pink-soft: var(--color-pink-300);
+  --bg-purple-soft: var(--color-purple-100);
+  --bg-green-soft: var(--color-green-300);
+
+  /* =========================
+     TEXT COLORS
+  ========================== */
+
+  --text-primary: #2d2d2d;     /* soft black */
+  --text-secondary: #6f6f73;   /* aesthetic gray */
+  --text-muted: #9a9aa0;
+
+  --text-on-purple: #ffffff;
+  --text-on-light: var(--text-primary);
+
+  /* =========================
+     ACCENT USAGE
+  ========================== */
+
+  --accent-primary: var(--color-purple-600);
+  --accent-secondary: var(--color-pink-500);
+  --accent-tertiary: var(--color-green-500);
+
+  /* =========================
+     TYPOGRAPHY
+  ========================== */
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.375rem;
+  --font-size-2xl: 1.75rem;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* =========================
+     RADIUS
+  ========================== */
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  /* =========================
+     SHADOWS (Pinterest-style)
+  ========================== */
+
+  --shadow-card:
+    0 4px 14px rgba(0, 0, 0, 0.08),
+    0 2px 4px rgba(0, 0, 0, 0.05);
+
+  --shadow-card-hover:
+    0 14px 32px rgba(89, 85, 179, 0.30),
+    0 6px 12px rgba(0, 0, 0, 0.08);
+
+  --shadow-soft:
+    0 6px 18px rgba(0, 0, 0, 0.06);
+
+  /* =========================
+     MOTION
+  ========================== */
+
+  --transition-fast: 0.2s ease;
+  --transition-base: 0.25s ease;
+}

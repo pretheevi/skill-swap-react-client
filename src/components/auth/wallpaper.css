@@ -1,0 +1,210 @@
+/* First card - contains the animated background */
+.auth-card:first-child {
+  padding: 1rem 0px 1rem 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-wallpaper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(40deg, var(--color-bg1), var(--color-bg2));
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.auth-wallpaper svg {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.auth-gradients {
+  position: absolute;
+  inset: 0;
+  filter: url(#goo-auth) blur(40px);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Fix: Position interactive element correctly and make it gooey */
+.auth-gradients .interactive {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle at 30% 30%,
+      rgba(var(--color-interactive), 1) 0%,
+      rgba(var(--color-interactive), 0.8) 30%,
+      rgba(var(--color-interactive), 0) 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: var(--blending);
+  pointer-events: none;
+  opacity: 0.9;
+  filter: blur(5px);
+  transition: opacity 0.3s ease;
+  will-change: transform;
+  z-index: 10;
+}
+
+/* Fix: Individual gradient animations and positioning */
+.auth-gradients .g1,
+.auth-gradients .g2,
+.auth-gradients .g3,
+.auth-gradients .g4,
+.auth-gradients .g5 {
+  position: absolute;
+  width: var(--circle-size);
+  height: var(--circle-size);
+  border-radius: 50%;
+  mix-blend-mode: var(--blending);
+  opacity: 0.8;
+  filter: blur(15px);
+  will-change: transform;
+}
+
+.auth-gradients .g1 {
+  background: radial-gradient(circle at 30% 30%, rgba(var(--color1), 0.9) 0%, rgba(var(--color1), 0) 70%);
+  top: calc(50% - var(--circle-size)/2);
+  left: calc(50% - var(--circle-size)/2);
+  animation: moveVertical 30s ease infinite;
+  transform-origin: center;
+}
+
+.auth-gradients .g2 {
+  background: radial-gradient(circle at 70% 30%, rgba(var(--color2), 0.9) 0%, rgba(var(--color2), 0) 70%);
+  top: calc(50% - var(--circle-size)/2);
+  left: calc(50% - var(--circle-size)/2);
+  animation: moveInCircle 20s linear infinite;
+  transform-origin: center;
+}
+
+.auth-gradients .g3 {
+  background: radial-gradient(circle at 30% 70%, rgba(var(--color3), 0.9) 0%, rgba(var(--color3), 0) 70%);
+  top: calc(50% - var(--circle-size)/2);
+  left: calc(50% - var(--circle-size)/2);
+  animation: moveInCircle 40s linear reverse infinite;
+  transform-origin: center;
+}
+
+.auth-gradients .g4 {
+  background: radial-gradient(circle at 70% 70%, rgba(var(--color4), 0.9) 0%, rgba(var(--color4), 0) 70%);
+  top: calc(50% - var(--circle-size)/2);
+  left: calc(50% - var(--circle-size)/2);
+  animation: moveHorizontal 35s ease infinite;
+  transform-origin: center;
+}
+
+.auth-gradients .g5 {
+  background: radial-gradient(circle at 50% 50%, rgba(var(--color5), 0.8) 0%, rgba(var(--color5), 0) 70%);
+  width: calc(var(--circle-size) * 1.2);
+  height: calc(var(--circle-size) * 1.2);
+  top: calc(50% - (var(--circle-size) * 1.2)/2);
+  left: calc(50% - (var(--circle-size) * 1.2)/2);
+  animation: moveInCircle 25s ease infinite;
+  transform-origin: center;
+}
+
+/* Improved animations with smoother transitions */
+@keyframes moveInCircle {
+  0% {
+    transform: rotate(0deg) translate(0, 0) scale(1);
+  }
+  25% {
+    transform: rotate(90deg) translate(5%, 5%) scale(1.1);
+  }
+  50% {
+    transform: rotate(180deg) translate(0, 10%) scale(1.2);
+  }
+  75% {
+    transform: rotate(270deg) translate(-5%, 5%) scale(1.1);
+  }
+  100% {
+    transform: rotate(360deg) translate(0, 0) scale(1);
+  }
+}
+
+@keyframes moveVertical {
+  0% {
+    transform: translateY(-40%) scale(1);
+  }
+  50% {
+    transform: translateY(40%) scale(1.3);
+  }
+  100% {
+    transform: translateY(-40%) scale(1);
+  }
+}
+
+@keyframes moveHorizontal {
+  0% {
+    transform: translateX(-40%) translateY(-10%) scale(1);
+  }
+  33% {
+    transform: translateX(30%) translateY(20%) scale(1.2);
+  }
+  66% {
+    transform: translateX(40%) translateY(-20%) scale(0.9);
+  }
+  100% {
+    transform: translateX(-40%) translateY(-10%) scale(1);
+  }
+}
+
+/* FIXED: Star icon styling */
+.faStar {
+  color: white;
+  font-size: 100px;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+  opacity: 1;
+  z-index: 1001;
+  position: relative;
+}
+
+/* FIXED: Add container for star */
+.star-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1001;
+}
+
+/* FIXED: Content overlap improvements */
+.auth-content-overlap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  padding: 40px 20px;
+  color: var(--text-on-purple);
+  z-index: 1000;
+  pointer-events: none; /* Allows clicking through to the gradient effects */
+}
+
+/* FIXED: Make text containers clickable if needed */
+.auth-content-overlap .star-container,
+.auth-content-overlap .text-container {
+  pointer-events: none;
+}
+
+/* Text styling */
+.auth-content-overlap .text-container > p {
+  font-size: var(--font-size-sm);
+  margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.auth-content-overlap .text-container > h1 {
+  font-size: var(--font-size-xl);
+  line-height: 1.3;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}

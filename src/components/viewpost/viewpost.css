@@ -1,0 +1,264 @@
+.main-viewpost-container{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; height: 100%;
+  padding: 0px; 
+  margin: 0px;
+  background-color: var(--bg-surface);
+  box-shadow: var(--shadow-card);
+  z-index: 9990;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.viw-wrapper{
+  width: 100%;
+  height: 100%;
+  padding: 0; margin: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.viw-media-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Ensure container takes full height */
+  overflow: hidden;
+}
+
+.viw-media-container > main {
+  position: relative;
+  flex: 1.5;
+  min-height: 0; /* Important for flex children to respect parent height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  height: 100%; /* Take full height of parent */
+}
+
+.viw-back-btn{
+  background: var(--color-purple-600);
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+
+.viw-carousel {
+  width: 100%;
+  height: 100%; /* Take full height of parent */
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.viw-carousel .carousel-inner {
+  height: 100%; /* Take full height of carousel */
+  width: 100%;
+  position: relative;
+}
+
+.viw-carousel .carousel-item {
+  height: 100%; /* Take full height of carousel-inner */
+  width: 100%;
+  position: relative;
+  display: none; /* Bootstrap will handle display */
+}
+
+.viw-carousel .carousel-item.active {
+  display: block; /* Bootstrap shows active item */
+}
+
+.viw-media-images {
+  width: 100%;
+  height: 100%; /* Take full height of carousel-item */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--bg-purple-soft) 0%, var(--bg-pink-soft) 100%);
+}
+
+/* media fills container without resizing parent */
+.viw-media-images img,
+.viw-media-images video {
+  max-width: 100%;
+  max-height: 100%; /* This ensures image doesn't exceed container height */
+  width: auto;
+  height: auto;
+  object-fit: contain; /* Keeps aspect ratio */
+  display: block;
+  margin: 0 auto; /* Center horizontally */
+}
+
+/* Carousel controls positioning */
+.viw-carousel .carousel-control-prev,
+.viw-carousel .carousel-control-next {
+  width: 44px;
+  height: 44px;
+  background: var(--color-purple-600);
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.9;
+  z-index: 10;
+}
+
+.viw-carousel .carousel-control-prev {
+  left: 20px;
+}
+
+.viw-carousel .carousel-control-next {
+  right: 20px;
+}
+
+.viw-carousel .carousel-control-prev:hover,
+.viw-carousel .carousel-control-next:hover {
+  background: var(--color-purple-500);
+  transform: translateY(-50%) scale(1.1);
+  opacity: 1;
+}
+
+.viw-carousel .carousel-control-prev-icon,
+.viw-carousel .carousel-control-next-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Action button positioning */
+.viw-action-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 10px;
+  z-index: 20;
+  pointer-events: none; /* Allow clicks to pass through to carousel controls */
+}
+
+.viw-action-btn button {
+  pointer-events: auto; /* But buttons should be clickable */
+}
+
+
+.viw-media-container > footer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 16px 20px;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--color-purple-100);
+  gap: 12px;
+}
+
+.viw-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 4px 0;
+}
+
+.viw-actions > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  transition: all var(--transition-fast);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.viw-actions > div:hover {
+  background: var(--color-purple-100);
+  transform: translateY(-2px);
+}
+
+.viw-actions > div:active {
+  transform: translateY(0);
+}
+
+/* Individual action hover colors */
+.viw-actions > div:first-child:hover {
+  color: var(--color-pink-500);
+}
+
+.viw-actions > div:first-child:hover svg {
+  filter: drop-shadow(0 2px 4px rgba(232, 166, 195, 0.4));
+}
+
+.viw-actions > div:nth-child(2):hover {
+  color: var(--color-purple-600);
+}
+
+.viw-actions > div:nth-child(2):hover svg {
+  filter: drop-shadow(0 2px 4px rgba(89, 85, 179, 0.3));
+}
+
+.viw-actions > div:nth-child(3):hover {
+  color: var(--color-green-500);
+}
+
+.viw-actions > div:nth-child(3):hover svg {
+  filter: drop-shadow(0 2px 4px rgba(143, 185, 168, 0.4));
+}
+
+.viw-actions > div:last-child {
+  margin-left: auto;
+}
+
+.viw-actions > div:last-child:hover {
+  color: var(--color-purple-700);
+  background: var(--color-purple-100);
+}
+
+.viw-actions span {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  min-width: 20px;
+  text-align: center;
+}
+
+
+/* Description section */
+.viw-description {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 4px 8px 0;
+  font-size: var(--font-size-md);
+  line-height: 1.6;
+  color: var(--text-primary);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-purple-300) var(--color-purple-100);
+}
+
+/* Custom scrollbar for description */
+.viw-description::-webkit-scrollbar {
+  width: 4px;
+}
+
+.viw-description::-webkit-scrollbar-track {
+  background: var(--color-purple-100);
+  border-radius: 4px;
+}
+
+.viw-description::-webkit-scrollbar-thumb {
+  background: var(--color-purple-400);
+  border-radius: 4px;
+}
+
+.viw-description::-webkit-scrollbar-thumb:hover {
+  background: var(--color-purple-600);
+}

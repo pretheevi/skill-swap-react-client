@@ -1,0 +1,400 @@
+.prf-followers-wrapper{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; height: 100%;
+  padding: 10px; margin: 0px;
+  background-color: transparent;
+  z-index: 100;
+}
+
+.prf-follow-list-container{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0; 
+  margin: 0;
+  max-height: 70%;
+  margin-top: 5rem;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-radius: var(--radius-md);
+  background-color: var(--bg-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.prf-followers-header-card{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  margin: 0;
+}
+
+.prf-followers-header-card{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  margin: 0;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.prf-follow-header{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  margin: 0;
+}
+
+.prf-follow-header > h1{
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.prf-follow-header > button{
+  padding: 5px 10px;
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  color: var(--text-on-purple);
+  background-color: #ff0000;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.prf-follow-header > button:hover{
+  background-color: #cc0000;
+}
+
+.prf-follow-search-card{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  margin: 0;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.prf-follow-search-card > input{
+  flex: 1;
+  padding: 5px 10px;
+  font-size: var(--font-size-md);
+  border: 1px solid var(--color-purple-600);
+  border-radius: var(--radius-sm);
+}
+
+.prf-follow-search-card > button{
+  margin-left: 10px;
+  padding: 5px 10px;
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  color: var(--text-on-purple);
+  background-color: var(--color-purple-600);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.prf-follow-list-card{
+  width: 100%;
+  padding: 0; 
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.prf-follow-list-card > ul{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.prf-follow-list-item{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  margin: 0;
+  border-bottom: 1px solid var(--bg-surface-alt);
+}
+
+.prf-follow-list-item > img{
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 3px solid var(--bg-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.prf-follow-list-item > h1{
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.prf-follow-list-item > button {
+  margin-left: auto;
+  padding: 5px 10px;
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  color: var(--text-on-purple);
+  background-color: var(--color-purple-600);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+
+/* Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+  .prf-follow-list-container {
+    width: 95% !important;
+    margin-top: 3rem;
+    max-height: 80%;
+  }
+
+  .prf-follow-header > h1 {
+    font-size: var(--font-size-md, 1rem);
+  }
+
+  .prf-follow-header > button {
+    padding: 3px 8px;
+    font-size: var(--font-size-sm, 0.875rem);
+  }
+
+  .prf-follow-search-card {
+    padding: 8px;
+  }
+
+  .prf-follow-search-card > input {
+    padding: 4px 8px;
+    font-size: var(--font-size-sm, 0.875rem);
+  }
+
+  .prf-follow-search-card > button {
+    margin-left: 8px;
+    padding: 4px 8px;
+    font-size: var(--font-size-sm, 0.875rem);
+  }
+
+  .prf-follow-list-item {
+    padding: 8px;
+  }
+
+  .prf-follow-list-item > img {
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+    border-width: 2px;
+  }
+
+  .prf-follow-list-item > h1 {
+    font-size: var(--font-size-md, 0.95rem);
+  }
+
+  .prf-follow-list-item > button {
+    padding: 4px 8px;
+    font-size: var(--font-size-sm, 0.813rem);
+  }
+}
+
+/* Extra Small Devices */
+@media screen and (max-width: 480px) {
+  .prf-follow-list-container {
+    margin-top: 2rem;
+    max-height: 85%;
+  }
+
+  .prf-follow-header {
+    padding: 6px;
+  }
+
+  .prf-follow-header > h1 {
+    font-size: var(--font-size-sm, 0.95rem);
+  }
+
+  .prf-follow-header > button {
+    padding: 2px 6px;
+    font-size: var(--font-size-xs, 0.75rem);
+  }
+
+  .prf-follow-search-card {
+    padding: 6px;
+  }
+
+  .prf-follow-search-card > input {
+    padding: 3px 6px;
+    font-size: var(--font-size-xs, 0.813rem);
+  }
+
+  .prf-follow-search-card > button {
+    padding: 3px 6px;
+    font-size: var(--font-size-xs, 0.75rem);
+  }
+
+  .prf-follow-list-item {
+    padding: 6px;
+  }
+
+  .prf-follow-list-item > img {
+    width: 28px;
+    height: 28px;
+    margin-right: 6px;
+  }
+
+  .prf-follow-list-item > h1 {
+    font-size: var(--font-size-sm, 0.875rem);
+  }
+
+  .prf-follow-list-item > button {
+    padding: 3px 6px;
+    font-size: var(--font-size-xs, 0.75rem);
+  }
+}
+
+
+
+/* Hover Effects and Animations */
+
+/* List item hover effect */
+.prf-follow-list-item {
+  transition: background-color 0.2s ease;
+}
+
+.prf-follow-list-item:hover {
+  background-color: var(--bg-surface-alt, #f5f5f5);
+  cursor: pointer;
+}
+
+/* Button animations */
+.prf-follow-list-item > button {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.prf-follow-list-item > button:hover {
+  background-color: var(--color-purple-700, #5a2e9e);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.prf-follow-list-item > button:active {
+  transform: scale(0.95);
+}
+
+/* Ripple effect on button click */
+.prf-follow-list-item > button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.prf-follow-list-item > button:focus:not(:active)::after {
+  animation: ripple 0.6s ease-out;
+}
+
+/* Close button hover animation */
+.prf-follow-header > button {
+  transition: all 0.2s ease;
+}
+
+.prf-follow-header > button:hover {
+  background-color: #ff3333;
+}
+
+/* Search button hover animation */
+.prf-follow-search-card > button {
+  transition: all 0.2s ease;
+}
+
+.prf-follow-search-card > button:hover {
+  background-color: var(--color-purple-700, #5a2e9e);
+  transform: scale(1.05);
+}
+
+.prf-follow-search-card > button:active {
+  transform: scale(0.95);
+}
+
+/* Search input focus effect */
+.prf-follow-search-card > input {
+  transition: all 0.2s ease;
+}
+
+.prf-follow-search-card > input:focus {
+  outline: none;
+  border-color: var(--color-purple-800, #4a1e8e);
+  box-shadow: 0 0 0 2px rgba(106, 27, 154, 0.2);
+}
+
+/* Avatar subtle scale on hover */
+.prf-follow-list-item > img {
+  transition: transform 0.2s ease;
+}
+
+.prf-follow-list-item:hover > img {
+  transform: scale(1.05);
+}
+
+/* Name color change on hover */
+.prf-follow-list-item > h1 {
+  transition: color 0.2s ease;
+}
+
+.prf-follow-list-item:hover > h1 {
+  color: var(--color-purple-600, #6a1b9a);
+}
+
+/* Ripple animation keyframes */
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  20% {
+    transform: scale(25, 25);
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40, 40);
+  }
+}
+
+/* Optional: Add loading animation for follow/unfollow button */
+.prf-follow-list-item > button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.prf-follow-list-item > button:disabled:hover {
+  background-color: var(--color-purple-600, #6a1b9a);
+  transform: none;
+  box-shadow: none;
+}
+
+

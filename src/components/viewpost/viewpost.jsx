@@ -1,0 +1,434 @@
+import React, { useEffect, useRef, useState, useContext } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faShare,
+  faSave,
+  faStar,
+  faPaperPlane,
+  faTimes,
+  faArrowLeft,
+  faHeart as faHeartSolid,
+} from '@fortawesome/free-solid-svg-icons';
+import { faMessage, faHeart } from '@fortawesome/free-regular-svg-icons';
+import { Carousel } from 'bootstrap/dist/js/bootstrap.bundle.min';
+
+import API from '../api/api';
+import './viewpost.css';
+import './viwcmt.css';
+import { NavigateContext } from '../../context/NavigateContext';
+import { toast } from 'react-toastify';
+
+function Viewpost(props) {
+  const { skill_id } = useParams();
+  const [searchParams] = useSearchParams();
+  const isHome = searchParams.get("isHome") === "true";
+
+  const navigate = useNavigate();
+
+  // Context
+  const { navbar, handleNavigation } = useContext(NavigateContext);
+  const { user, setUser } = useContext(AuthContext);
+
+  // State declarations
+  const [post, setPost] = useState(null);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 992);
+  const [viwPostNav, setViwPostNav] = useState({
+    media: true,
+    comments: false,
+  });
+
+  const [allComments, setAllComments] = useState([]);
+  const [expandedComments, setExpandedComments] = useState({});
+  const [comment, setComment] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Refs
+  const textareaRef = useRef(null);
+  const carouselInitialized = useRef(false);
+
+  // Handlers
+  const handleViwPostNav = (name) => {
+    setViwPostNav({
+      media: false,
+      comments: false,
+      [name]: true,
+    });
+  };
+
+  const handleCommentInput = (e) => {
+    const { value } = e.target;
+    
+    if (value.length >= 2000) {
+      toast.warning('Comment limit reached');
+      return;
+    }
+    
+    setComment(value);
+    
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 300) + 'px';
+    }
+  };
+
+  const handleCommentSubmit = async () => {
+    if (!comment.trim()) return;
+    if (!user) {
+      toast.error('Please login to comment');
+      return;
+    }
+    
+    const tempComment = {
+      tempId: Date.now(), // 👈 frontend identity
+      id: null,           // 👈 backend identity (not yet)
+      user_name: user.name,
+      user_avatar: user.avatar,
+      text: comment,
+      like_count: 0,
+      user_liked: false,
+      isTemp: true,
+    };
+
+    // Optimistic update
+    setAllComments(prev => [tempComment, ...prev]);
+
+    // Update comment count
+    setPost(prev => ({
+      ...prev,
+      comment_count: (prev?.comment_count || 0) + 1,
+    }));
+
+    const commentText = comment;
+
+    // Clear textarea
+    setComment('');
+    
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+
+    try {
+      const payload = {
+        skill_id: post?.skill_id || skill_id,
+        text: commentText,
+      };
+
+      const response = await API.post('/comment', payload);
+      console.log('Comment posted:', response.data);
+
+      // Replace temp comment with real one
+      setAllComments(prev =>
+        prev.map(c =>
+          c.tempId === tempComment.tempId
+            ? {
+                ...response.data,
+                tempId: c.tempId, // 👈 keep frontend key stable
+                isTemp: false
+              }
+            : c
+        )
+      );
+
+    } catch (error) {
+      console.log('Error posting comment:', error);
+      toast.error(error.response?.data?.message || 'Error posting comment');
+
+      // Rollback if failed
+      setAllComments(prev => prev.filter(c => c.id !== tempComment.id));
+      setPost(prev => ({ 
+        ...prev, 
+        comment_count: Math.max(0, (prev?.comment_count || 0) - 1) 
+      }));
+    }
+  };
+
+  const handleFetchComments = async () => {
+    const postId = post?.skill_id || skill_id;
+    if (!postId) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await API.get(`/comments/${postId}`);
+      console.log('Fetched comments:', response.data);
+      setAllComments(response.data || []);
+    } catch (error) {
+      console.log('Error fetching comments:', error);
+      toast.error('Failed to load comments');
+      setAllComments([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleComment = (id) => {
+    setExpandedComments(prev => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const handleLikeComment = async (commentId, currentlyLiked) => {
+    try {
+      const payload = { comment_id: commentId };
+      const response = await API.post('/commentlike/toggle', payload);
+      const { like_count, liked } = response.data;
+      
+      setAllComments(prev => 
+        prev.map(c => 
+          c.id === commentId 
+            ? { ...c, like_count: like_count, user_liked: liked } 
+            : c
+        )
+      );
+    } catch (error) {
+      console.log('Error liking comment:', error);
+      toast.error(error.response?.data?.message || 'Error liking comment');
+    }
+  };
+
+  const getPostDetails = async () => {
+    const id = skill_id || props.post?.skill_id;
+    if (!id) return;
+    
+    try {
+      const response = await API.get(`/skills/${id}`);
+      console.log('Post details:', response.data);
+      setPost(response.data);
+    } catch (error) {
+      console.log('Error fetching post:', error);
+      toast.error('Failed to load post');
+    }
+  };
+
+  // Fetch post details on mount or when skill_id changes
+  useEffect(() => {
+    getPostDetails();
+  }, [skill_id]); 
+
+  useEffect(() => {
+    if (skill_id) {
+      handleFetchComments();
+    }
+  }, [skill_id]);
+
+  // Handle resize
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 992);
+    window.addEventListener('resize', handleResize);
+    
+    // Set initial view based on props
+    if (isHome) {
+      handleViwPostNav('comments');
+    }
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isHome]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="row viw-wrapper">
+      {/* Media Section */}
+      {post && (viwPostNav.media || isDesktop) && (
+        <div className="viw-media-container col-12 col-lg-6">
+          <main className="viw-media">
+            <div className="viw-action-btn d-flex justify-content-between w-100 d-lg-none">
+              <button className="viw-back-btn" onClick={() => navigate(`/profile/${post.user_id}`)}>
+                <FontAwesomeIcon icon={faArrowLeft} />
+              </button>
+            </div>
+            
+            <div
+              id={`viw-carousel-${post.skill_id}`}
+              className="carousel slide viw-carousel"
+            >
+              <div className="carousel-inner">
+                {post.media?.map((item, index) => (
+                  <div
+                    key={item.media_id}
+                    className={`carousel-item ${index === 0 ? 'active' : ''}`}
+                  >
+                    <div className="viw-media-images">
+                      {item.media_type === 'image' ? (
+                        <img src={item.media_url} alt="" />
+                      ) : (
+                        <video src={item.media_url} controls />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {post.media?.length > 1 && (
+                <>
+                  <button
+                    className="carousel-control-prev"
+                    type="button"
+                    data-bs-target={`#viw-carousel-${post.skill_id}`}
+                    data-bs-slide="prev"
+                  >
+                    <span className="carousel-control-prev-icon"></span>
+                  </button>
+                  <button
+                    className="carousel-control-next"
+                    type="button"
+                    data-bs-target={`#viw-carousel-${post.skill_id}`}
+                    data-bs-slide="next"
+                  >
+                    <span className="carousel-control-next-icon"></span>
+                  </button>
+                </>
+              )}
+            </div>
+          </main>
+
+          <footer className="viw-footer">
+            <div className="viw-actions d-flex gap-3">
+              <div>
+                <FontAwesomeIcon icon={faHeart} />
+                <span>0</span>
+              </div>
+              <div onClick={() => {
+                if (!isDesktop) {
+                  handleViwPostNav('comments');
+                }
+              }}>
+                <FontAwesomeIcon icon={faMessage} />
+                <span>{post?.comments?.comment_count || 0}</span>
+              </div>
+              <div>
+                <FontAwesomeIcon icon={faShare} />
+              </div>
+              <div className="ms-auto">
+                <FontAwesomeIcon icon={faSave} />
+              </div>
+            </div>
+            
+            <div className="viw-description">{post.description}</div>
+          </footer>
+        </div>
+      )}
+
+      {/* Comments Section */}
+      {(viwPostNav.comments || isDesktop) && (
+        <div className="viw-comments-container col-12 col-lg-6">
+          <div className="viw-cmt-heading-container d-flex justify-content-between items-center">
+            <h1 className="viw-cmt-heading">Comments</h1>
+            
+            <FontAwesomeIcon
+              icon={faTimes}
+              className="viw-cmt-close-btn d-lg-none"
+              onClick={() => {
+                if (isHome) {
+                  navigate('/feed');
+                } else {
+                  handleViwPostNav('media');
+                }
+              }}
+            />
+
+            <FontAwesomeIcon
+              icon={faTimes}
+              className="viw-cmt-close-btn d-none d-lg-flex"
+              onClick={() => {
+                if (isHome) {
+                  navigate('/feed');
+                } else {
+                  navigate('/profile');
+                }
+              }}
+            />
+          </div>
+
+          {isLoading ? (
+            <div className="text-center p-4">Loading comments...</div>
+          ) : (
+            <ul className="viw-cmt-list">
+              {allComments && allComments.length > 0 ? (
+                allComments.map(cmt => {
+                  const isExpanded = expandedComments[cmt.id];
+                  return (
+                    <li className="viw-cmt-list-item" key={cmt.tempId || cmt.id}>
+                      <div className="viw-cmt-lst-item-prf">
+                        <img src={cmt.user_avatar || '/avatar.jpg'} alt="" />
+                      </div>
+                      
+                      <div className="viw-cmt-lst-item-cmt">
+                        <div className='viw-cmt-lst-item-cmt-header'>
+                          <h1 className='viw-cmt-username'>{cmt.user_name}</h1>
+                          <div className='d-flex flex-column justify-content-center align-items-center'>
+                            {cmt.user_liked ? (
+                              <FontAwesomeIcon 
+                                icon={faHeartSolid} 
+                                className='viw-cmt-like-btn liked'
+                                onClick={() => { 
+                                    if(!cmt.isTemp) { 
+                                    handleLikeComment(cmt.id, cmt.user_liked);
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <FontAwesomeIcon 
+                                icon={faHeart} 
+                                className='viw-cmt-like-btn'
+                                onClick={() => { 
+                                      if(!cmt.isTemp) { 
+                                      handleLikeComment(cmt.id, cmt.user_liked);
+                                    }
+                                }}
+                              />
+                            )}
+                            <p className='viw-cmt-like-count'>{cmt.like_count || 0}</p>
+                          </div>
+                        </div>
+                       
+                        <p>
+                          {isExpanded
+                            ? cmt.text
+                            : cmt.text?.slice(0, 200) +
+                              (cmt.text?.length > 200 ? '...' : '')}
+                          
+                          {cmt.text?.length > 200 && (
+                            <FontAwesomeIcon
+                              icon={faStar}
+                              style={{ cursor: 'pointer', marginLeft: '5px' }}
+                              onClick={() => toggleComment(cmt.id)}
+                            />
+                          )}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })
+              ) : (
+                <li className="text-center p-4">No comments yet. Be the first to comment!</li>
+              )}
+            </ul>
+          )}
+
+          <div className="viw-add-cmt">
+            <textarea
+              ref={textareaRef}
+              name="newCmt"
+              placeholder="Type here..."
+              onChange={handleCommentInput}
+              value={comment}
+              rows={1}
+            />
+            
+            <div className="viw-add-cmt-button">
+              <FontAwesomeIcon
+                icon={faPaperPlane}
+                onClick={handleCommentSubmit}
+                style={{ cursor: comment.trim() ? 'pointer' : 'not-allowed', opacity: comment.trim() ? 1 : 0.5 }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Viewpost;
