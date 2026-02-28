@@ -483,3 +483,20 @@ html, body {
   height: 100%;
   min-height: 0;
 }
+
+/* Make the first row (containing sidebar & main) take all available space */
+.layout > .row:first-child {
+  flex: 1 1 auto;
+  min-height: 0;   /* crucial for flex children to shrink properly */
+}
+
+/* Give the mobile nav row a fixed height and prevent shrinking */
+.layout > .row:last-child {
+  flex: 0 0 auto;
+  height: 60px;    /* adjust to your actual nav height */
+}
+
+/* Ensure the main content area (bg-main-bar) can scroll internally */
+.bg-main-bar {
+  overflow-y: auto;  /* instead of hidden, so feed scrolls inside */
+}
