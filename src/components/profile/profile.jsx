@@ -3,22 +3,21 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSearch,
-  faPlus,
   faShare,
   faSave,
-  faHome,
   faGear,
   faDoorOpen,
   faTimes,
+  faHeart as faHeartSolid,
 } from '@fortawesome/free-solid-svg-icons';
-import { faBell, faMessage, faHeart } from '@fortawesome/free-regular-svg-icons';
+import { faMessage, faHeart } from '@fortawesome/free-regular-svg-icons';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './profile.css';
 import './follow.css';
 import API from '../api/api.js';
 
-import { FeedContext } from '../../context/FeedContext.jsx';
+
 import { AuthContext } from '../../context/AuthContext.js';
 import { toast } from 'react-toastify';
 
@@ -51,6 +50,7 @@ function Profile() {
       const response = await API.get(`/my-skillsById/${profileUser.id}`);
       console.log(response);
       setPost(response.data);
+      setPorfileUser(prev => ({...prev, skill_count: response.data.length}))
     } catch (error) {
       console.log(error);
     }
@@ -107,14 +107,20 @@ function Profile() {
         await API.post(`/follow/${userId}`);
       }
       console.log('Follow/unfollow API call successful');
-      console.log('before refresh user', user);
 
       // Refresh the counts in the user object
       try {
         const updatedUserResponse = await API.get('/profile'); // Adjust endpoint as needed
         console.log('updated user response', updatedUserResponse);
+        const {followers_count, following_count} = updatedUserResponse.data;
         if (updatedUserResponse.data) {
-          setUser(updatedUserResponse.data);
+          setPorfileUser(prev => (
+          {
+            ...prev, 
+            followers_count: followers_count, 
+            following_count: following_count
+          }
+          ))
         }
       } catch (error) {
         console.log('Error refreshing user data:', error);
@@ -173,9 +179,10 @@ function Profile() {
 
   // Effects
   useEffect(() => {
-    console.log(loggedUser)
-    getAllPost();
-  }, [profileUser]); 
+    if (profileUser?.id) {
+      getAllPost();
+    }
+  }, [profileUser?.id]); 
 
   // Add useEffect to refresh data when showFollow changes
   useEffect(() => {
@@ -214,7 +221,7 @@ function Profile() {
 
               <div className="prf-count-card">
                 <span className="prf-count-item">
-                  <h1>{profileUser?.posts_count || 0}</h1>
+                  <h1>{profileUser?.skill_count || 0}</h1>
                   <p>posts</p>
                 </span>
                 <span className="prf-count-item"
@@ -317,8 +324,10 @@ function Profile() {
                     <footer className="card-footer">
                       <div className="card-actions">
                         <div>
-                          <FontAwesomeIcon icon={faHeart} />
-                          <span>0</span>
+                          <FontAwesomeIcon 
+                          className={`${card.user_liked ? 'skill-liked-icon' : ''}`}
+                          icon={card.user_liked ? faHeartSolid : faHeart} />
+                          <span>{card.like_count}</span>
                         </div>
                         <div>
                           <FontAwesomeIcon icon={faMessage} />

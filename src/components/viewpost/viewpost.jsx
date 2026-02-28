@@ -12,13 +12,11 @@ import {
   faHeart as faHeartSolid,
 } from '@fortawesome/free-solid-svg-icons';
 import { faMessage, faHeart } from '@fortawesome/free-regular-svg-icons';
-import { Carousel } from 'bootstrap/dist/js/bootstrap.bundle.min';
+import { toast } from 'react-toastify';
 
 import API from '../api/api';
 import './viewpost.css';
 import './viwcmt.css';
-import { NavigateContext } from '../../context/NavigateContext';
-import { toast } from 'react-toastify';
 
 function Viewpost(props) {
   const { skill_id } = useParams();
@@ -28,8 +26,7 @@ function Viewpost(props) {
   const navigate = useNavigate();
 
   // Context
-  const { navbar, handleNavigation } = useContext(NavigateContext);
-  const { user, setUser } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   // State declarations
   const [post, setPost] = useState(null);
@@ -46,7 +43,6 @@ function Viewpost(props) {
   
   // Refs
   const textareaRef = useRef(null);
-  const carouselInitialized = useRef(false);
 
   // Handlers
   const handleViwPostNav = (name) => {
@@ -170,10 +166,12 @@ function Viewpost(props) {
     }));
   };
 
+  const [heartBeatId, setHeartBeatId] = useState(null);
   const handleLikeComment = async (commentId, currentlyLiked) => {
     try {
       const payload = { comment_id: commentId };
       const response = await API.post('/commentlike/toggle', payload);
+      console.log('user liked a comment', response.data);
       const { like_count, liked } = response.data;
       
       setAllComments(prev => 
@@ -183,11 +181,36 @@ function Viewpost(props) {
             : c
         )
       );
+
+      if (liked) {
+        setHeartBeatId(commentId);
+        setTimeout(() => setHeartBeatId(null), 400);
+      }
+
     } catch (error) {
       console.log('Error liking comment:', error);
       toast.error(error.response?.data?.message || 'Error liking comment');
     }
   };
+
+    const [skillHeartBeatId, setSkillHeartBeatId] = useState(null);
+    const handleSkillLike = async (skill_id) => {
+      try {
+        const response = await API.post(`/${skill_id}/like/toggle`);
+        console.log(response.data)
+        const { likeCount, liked } = response.data.data;
+        console.log(likeCount, liked);
+        setPost(prev => ({...prev, like_count: likeCount, user_liked: liked}));
+        
+        if (liked) {
+          setSkillHeartBeatId(skill_id);
+          setTimeout(() => setSkillHeartBeatId(null), 400);
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error(error.response.data.message);
+      }
+    }
 
   const getPostDetails = async () => {
     const id = skill_id || props.post?.skill_id;
@@ -240,7 +263,7 @@ function Viewpost(props) {
             </div>
             
             <div
-              id={`viw-carousel-${post.skill_id}`}
+              id={`viw-carousel-${post.id}`}
               className="carousel slide viw-carousel"
             >
               <div className="carousel-inner">
@@ -265,7 +288,7 @@ function Viewpost(props) {
                   <button
                     className="carousel-control-prev"
                     type="button"
-                    data-bs-target={`#viw-carousel-${post.skill_id}`}
+                    data-bs-target={`#viw-carousel-${post.id}`}
                     data-bs-slide="prev"
                   >
                     <span className="carousel-control-prev-icon"></span>
@@ -273,7 +296,7 @@ function Viewpost(props) {
                   <button
                     className="carousel-control-next"
                     type="button"
-                    data-bs-target={`#viw-carousel-${post.skill_id}`}
+                    data-bs-target={`#viw-carousel-${post.id}`}
                     data-bs-slide="next"
                   >
                     <span className="carousel-control-next-icon"></span>
@@ -285,17 +308,28 @@ function Viewpost(props) {
 
           <footer className="viw-footer">
             <div className="viw-actions d-flex gap-3">
-              <div>
-                <FontAwesomeIcon icon={faHeart} />
-                <span>0</span>
+              <div onClick={() => handleSkillLike(post.id)}>
+                {post.user_liked
+                  ? (<FontAwesomeIcon 
+                    className={`viw-cmt-like-btn
+                      ${post.user_liked ? 'liked' : ''}
+                      ${skillHeartBeatId === post.id ? 'heart-beat-once' : ''}
+                    `}
+                    icon={faHeartSolid} />)
+                  : (<FontAwesomeIcon 
+                    className='viw-cmt-like-btn'
+                    icon={faHeart} />)
+                }
+                <span>{post.like_count}</span>
               </div>
+
               <div onClick={() => {
                 if (!isDesktop) {
                   handleViwPostNav('comments');
                 }
               }}>
                 <FontAwesomeIcon icon={faMessage} />
-                <span>{post?.comments?.comment_count || 0}</span>
+                <span>{post?.comment_count || 0}</span>
               </div>
               <div>
                 <FontAwesomeIcon icon={faShare} />
@@ -335,7 +369,7 @@ function Viewpost(props) {
                 if (isHome) {
                   navigate('/feed');
                 } else {
-                  navigate('/profile');
+                  navigate(`/profile/${post.user_id}`)
                 }
               }}
             />
@@ -358,27 +392,18 @@ function Viewpost(props) {
                         <div className='viw-cmt-lst-item-cmt-header'>
                           <h1 className='viw-cmt-username'>{cmt.user_name}</h1>
                           <div className='d-flex flex-column justify-content-center align-items-center'>
-                            {cmt.user_liked ? (
                               <FontAwesomeIcon 
-                                icon={faHeartSolid} 
-                                className='viw-cmt-like-btn liked'
+                                icon={cmt.user_liked ? faHeartSolid : faHeart} 
+                                  className={`viw-cmt-like-btn
+                                    ${cmt.user_liked ? 'liked' : ''}
+                                    ${heartBeatId === cmt.id ? 'heart-beat-once' : ''}
+                                  `}
                                 onClick={() => { 
                                     if(!cmt.isTemp) { 
                                     handleLikeComment(cmt.id, cmt.user_liked);
                                   }
                                 }}
                               />
-                            ) : (
-                              <FontAwesomeIcon 
-                                icon={faHeart} 
-                                className='viw-cmt-like-btn'
-                                onClick={() => { 
-                                      if(!cmt.isTemp) { 
-                                      handleLikeComment(cmt.id, cmt.user_liked);
-                                    }
-                                }}
-                              />
-                            )}
                             <p className='viw-cmt-like-count'>{cmt.like_count || 0}</p>
                           </div>
                         </div>

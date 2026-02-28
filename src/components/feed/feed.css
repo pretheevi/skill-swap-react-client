@@ -1,0 +1,16 @@
+
+.skill-liked-icon{
+  color: #ff4d4d;
+}
+
+.heart-beat-once {
+  animation: heartBeat 0.4s ease-in-out;
+}
+
+@keyframes heartBeat {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(1.25); }
+  50%  { transform: scale(0.95); }
+  75%  { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
