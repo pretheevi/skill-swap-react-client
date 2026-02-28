@@ -56,7 +56,8 @@ function Feed() {
               className="card"
               style={{ gridRow: `span ${RATIO_TO_SPAN[card.media_ratio]}` }}
             >
-              <header className="card-header">
+              <header className="card-header" 
+              onClick={() => navigate(`/profile/${card.user_id}`)}>
                 <img
                   src={card.user_avatar || '/avatar.jpg'}
                   alt="profile"

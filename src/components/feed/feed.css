@@ -1,4 +1,8 @@
 
+.card-header{
+  cursor: pointer;
+}
+
 .skill-liked-icon{
   color: #ff4d4d;
 }
