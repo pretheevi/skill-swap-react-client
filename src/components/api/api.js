@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API  = axios.create({
-  baseURL:  "http://localhost:8080/api",
+  baseURL:  "https://insta-mirror-server.onrender.com",
 });
 
 // request interceptor to add token to headers
@@ -15,5 +15,5 @@ API.interceptors.request.use((config) => {
 
 export default API;
 
-// 
+// http://localhost:8080/api
 // "https://insta-mirror-server.onrender.com"
