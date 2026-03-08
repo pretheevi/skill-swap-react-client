@@ -15,6 +15,7 @@ import { faMessage, faHeart } from '@fortawesome/free-regular-svg-icons';
 import { toast } from 'react-toastify';
 
 import API from '../api/api';
+import Loader from '../loader/loader';
 import './viewpost.css';
 import './viwcmt.css';
 
@@ -37,15 +38,6 @@ function Viewpost(props) {
   
   // Refs
   const textareaRef = useRef(null);
-
-  // Handlers
-  const handleViwPostNav = (name) => {
-    setViwPostNav({
-      media: false,
-      comments: false,
-      [name]: true,
-    });
-  };
 
   const handleCommentInput = (e) => {
     const { value } = e.target;
@@ -206,17 +198,21 @@ function Viewpost(props) {
       }
     }
 
+  const [postLoading, setPostLoading] = useState(false);
   const getPostDetails = async () => {
     const id = skill_id || props.post?.skill_id;
     if (!id) return;
     
     try {
+      setPostLoading(true);
       const response = await API.get(`/skills/${id}`);
       console.log('Post details:', response.data);
       setPost(response.data);
+      setPostLoading(false);
     } catch (error) {
       console.log('Error fetching post:', error);
       toast.error('Failed to load post');
+      setPostLoading(false);
     }
   };
 
@@ -233,6 +229,7 @@ function Viewpost(props) {
 
   return (                        
     <div className="row viw-wrapper">
+      {postLoading && <Loader />}
       {/* Media Section */}
       {post && (
         <div className="viw-media-container col-12">

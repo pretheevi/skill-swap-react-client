@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 
 import API from '../api/api';
 import { AuthContext } from '../../context/AuthContext';
+import Loader from '../loader/loader';
 import './explore.css';
 
 
@@ -73,95 +74,95 @@ function Explore() {
     }
   };
 
-const handleFollowAction = async (userId, isCurrentlyFollowing) => {
-    console.log('========== FOLLOW ACTION STARTED ==========');
-    console.log('Timestamp:', new Date().toISOString());
-    console.log('User ID:', userId);
-    console.log('Currently Following:', isCurrentlyFollowing);
-    console.log('Current search results count:', searchResults.length);
-    
-    // Find the user in current results for logging
-    const targetUser = searchResults.find(u => u.id === userId);
-    console.log('Target user details:', targetUser ? {
-      name: targetUser.name,
-      username: targetUser.username,
-      currentFollowStatus: targetUser.is_following
-    } : 'User not found in results');
-    
-    // Store original state for rollback in case of error
-    const originalResults = [...searchResults];
-    console.log('Original results saved for rollback');
-    
-    // Optimistically update UI
-    console.log('Optimistically updating UI - toggling follow status');
-    setSearchResults(prev => {
-      const newResults = prev.map(u =>
-        u.id === userId ? { ...u, is_following: !isCurrentlyFollowing } : u
-      );
+  const handleFollowAction = async (userId, isCurrentlyFollowing) => {
+      console.log('========== FOLLOW ACTION STARTED ==========');
+      console.log('Timestamp:', new Date().toISOString());
+      console.log('User ID:', userId);
+      console.log('Currently Following:', isCurrentlyFollowing);
+      console.log('Current search results count:', searchResults.length);
       
-      // Log the updated user
-      const updatedUser = newResults.find(u => u.id === userId);
-      console.log('Optimistic update complete. New status:', updatedUser?.is_following);
-      
-      return newResults;
-    });
-
-    try {
-      console.log(`Making API call to ${isCurrentlyFollowing ? 'unfollow' : 'follow'} endpoint...`);
-      console.log('Request URL:', `/api/${isCurrentlyFollowing ? 'unfollow' : 'follow'}/${userId}`);
-      
-      const startTime = Date.now();
-      
-      if (isCurrentlyFollowing) {
-        await API.delete(`/follow/${userId}`);
-        setUser(prev => ({
-          ...prev,
-          following_count: prev.following_count - 1
-        }));
-        console.log('✅ Unfollow API call successful');
-      } else {
-        await API.post(`/follow/${userId}`);
-        setUser(prev => ({
-          ...prev,
-          following_count: prev.following_count + 1
-        }));
-        console.log('✅ Follow API call successful');
-      }
-      
-      const endTime = Date.now();
-      console.log(`API call completed in ${endTime - startTime}ms`);
-      
-      toast.success(`User ${isCurrentlyFollowing ? 'unfollowed' : 'followed'} successfully`);
-      console.log('Toast notification sent');
-      
-    } catch (error) {
-      console.log('❌ API call failed!');
-      console.log('Error name:', error.name);
-      console.log('Error message:', error.message);
-      console.log('Error response:', error.response?.data);
-      console.log('Error status:', error.response?.status);
-      console.log('Error headers:', error.response?.headers);
-      
-      // Rollback on error
-      console.log('Rolling back optimistic update...');
-      setSearchResults(originalResults);
-      console.log('Rollback complete - restored original results');
-      
-      toast.error(error.response?.data?.error || 'Action failed');
-      console.log('Error toast sent');
-      
-    } finally {
-      console.log('========== FOLLOW ACTION COMPLETED ==========');
-      console.log('Final search results count:', searchResults.length);
-      
-      // Log final status of the target user
-      const finalUser = searchResults.find(u => u.id === userId);
-      console.log('Final status for user:', finalUser ? {
-        id: finalUser.id,
-        name: finalUser.name,
-        is_following: finalUser.is_following
+      // Find the user in current results for logging
+      const targetUser = searchResults.find(u => u.id === userId);
+      console.log('Target user details:', targetUser ? {
+        name: targetUser.name,
+        username: targetUser.username,
+        currentFollowStatus: targetUser.is_following
       } : 'User not found in results');
-    }
+      
+      // Store original state for rollback in case of error
+      const originalResults = [...searchResults];
+      console.log('Original results saved for rollback');
+      
+      // Optimistically update UI
+      console.log('Optimistically updating UI - toggling follow status');
+      setSearchResults(prev => {
+        const newResults = prev.map(u =>
+          u.id === userId ? { ...u, is_following: !isCurrentlyFollowing } : u
+        );
+        
+        // Log the updated user
+        const updatedUser = newResults.find(u => u.id === userId);
+        console.log('Optimistic update complete. New status:', updatedUser?.is_following);
+        
+        return newResults;
+      });
+
+      try {
+        console.log(`Making API call to ${isCurrentlyFollowing ? 'unfollow' : 'follow'} endpoint...`);
+        console.log('Request URL:', `/api/${isCurrentlyFollowing ? 'unfollow' : 'follow'}/${userId}`);
+        
+        const startTime = Date.now();
+        
+        if (isCurrentlyFollowing) {
+          await API.delete(`/follow/${userId}`);
+          setUser(prev => ({
+            ...prev,
+            following_count: prev.following_count - 1
+          }));
+          console.log('✅ Unfollow API call successful');
+        } else {
+          await API.post(`/follow/${userId}`);
+          setUser(prev => ({
+            ...prev,
+            following_count: prev.following_count + 1
+          }));
+          console.log('✅ Follow API call successful');
+        }
+        
+        const endTime = Date.now();
+        console.log(`API call completed in ${endTime - startTime}ms`);
+        
+        toast.success(`User ${isCurrentlyFollowing ? 'unfollowed' : 'followed'} successfully`);
+        console.log('Toast notification sent');
+        
+      } catch (error) {
+        console.log('❌ API call failed!');
+        console.log('Error name:', error.name);
+        console.log('Error message:', error.message);
+        console.log('Error response:', error.response?.data);
+        console.log('Error status:', error.response?.status);
+        console.log('Error headers:', error.response?.headers);
+        
+        // Rollback on error
+        console.log('Rolling back optimistic update...');
+        setSearchResults(originalResults);
+        console.log('Rollback complete - restored original results');
+        
+        toast.error(error.response?.data?.error || 'Action failed');
+        console.log('Error toast sent');
+        
+      } finally {
+        console.log('========== FOLLOW ACTION COMPLETED ==========');
+        console.log('Final search results count:', searchResults.length);
+        
+        // Log final status of the target user
+        const finalUser = searchResults.find(u => u.id === userId);
+        console.log('Final status for user:', finalUser ? {
+          id: finalUser.id,
+          name: finalUser.name,
+          is_following: finalUser.is_following
+        } : 'User not found in results');
+      }
   };
 
   const clearSearch = () => {

@@ -75,7 +75,7 @@ function Feed() {
                   className="carousel slide"
                   data-bs-ride="false"
                 >
-                  <div className="carousel-inner">
+                  <div className="carousel-inner" onClick={() => navigate(`/feed/viewpost/${card.skill_id}?isHome=false`)}>
                     {card.media.map((item, index) => (
                       <div
                         key={item.media_id}

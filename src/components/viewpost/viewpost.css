@@ -54,13 +54,14 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  padding-top: 1rem;
 }
 
-@media (min-width: 768px) {
+/* @media (min-width: 768px) {
   .viw-carousel {
     height: 900px;
   }
-}
+} */
 
 .viw-carousel .carousel-inner {
   height: 100%; /* Take full height of carousel */
