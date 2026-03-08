@@ -259,7 +259,7 @@ function App() {
                       path='/viewpost/:skill_id'
                       element={
                         <div className="container-fluid main-viewpost-container">
-                          <Viewpost isHome={true} />
+                          <Viewpost isHome={false} />
                         </div>}
                     />
 

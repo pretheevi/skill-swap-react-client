@@ -30,12 +30,6 @@ function Viewpost(props) {
 
   // State declarations
   const [post, setPost] = useState(null);
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 992);
-  const [viwPostNav, setViwPostNav] = useState({
-    media: true,
-    comments: false,
-  });
-
   const [allComments, setAllComments] = useState([]);
   const [expandedComments, setExpandedComments] = useState({});
   const [comment, setComment] = useState('');
@@ -237,27 +231,15 @@ function Viewpost(props) {
     }
   }, [skill_id]);
 
-  // Handle resize
-  useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth >= 992);
-    window.addEventListener('resize', handleResize);
-    
-    // Set initial view based on props
-    if (isHome) {
-      handleViwPostNav('comments');
-    }
-    
-    return () => window.removeEventListener('resize', handleResize);
-  }, [isHome]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
+  return (                        
     <div className="row viw-wrapper">
       {/* Media Section */}
-      {post && (viwPostNav.media || isDesktop) && (
-        <div className="viw-media-container col-12 col-lg-6">
+      {post && (
+        <div className="viw-media-container col-12">
           <main className="viw-media">
-            <div className="viw-action-btn d-flex justify-content-between w-100 d-lg-none">
-              <button className="viw-back-btn" onClick={() => navigate(`/profile/${post.user_id}`)}>
+            <div className="viw-action-btn p-0">
+              <button className="viw-back-btn" onClick={() => navigate(-1)}> 
+                {/* `/profile/${post.user_id}` */}
                 <FontAwesomeIcon icon={faArrowLeft} />
               </button>
             </div>
@@ -323,11 +305,7 @@ function Viewpost(props) {
                 <span>{post.like_count}</span>
               </div>
 
-              <div onClick={() => {
-                if (!isDesktop) {
-                  handleViwPostNav('comments');
-                }
-              }}>
+              <div>
                 <FontAwesomeIcon icon={faMessage} />
                 <span>{post?.comment_count || 0}</span>
               </div>
@@ -345,36 +323,8 @@ function Viewpost(props) {
       )}
 
       {/* Comments Section */}
-      {(viwPostNav.comments || isDesktop) && (
-        <div className="viw-comments-container col-12 col-lg-6">
-          <div className="viw-cmt-heading-container d-flex justify-content-between items-center">
-            <h1 className="viw-cmt-heading">Comments</h1>
-            
-            <FontAwesomeIcon
-              icon={faTimes}
-              className="viw-cmt-close-btn d-lg-none"
-              onClick={() => {
-                if (isHome) {
-                  navigate('/feed');
-                } else {
-                  handleViwPostNav('media');
-                }
-              }}
-            />
-
-            <FontAwesomeIcon
-              icon={faTimes}
-              className="viw-cmt-close-btn d-none d-lg-flex"
-              onClick={() => {
-                if (isHome) {
-                  navigate('/feed');
-                } else {
-                  navigate(`/profile/${post.user_id}`)
-                }
-              }}
-            />
-          </div>
-
+      {post && (
+        <div className="viw-comments-container col-12">
           {isLoading ? (
             <div className="text-center p-4">Loading comments...</div>
           ) : (

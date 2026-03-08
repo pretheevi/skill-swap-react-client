@@ -66,10 +66,6 @@ function Explore() {
       
       setRecentSearches(updatedSearches);
       localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
-      
-      if (resultUsers.length === 0) {
-        toast.info('No users found');
-      }
     } catch (error) {
       toast.error(error.response?.data?.error || 'Search failed');
     } finally {
@@ -228,7 +224,7 @@ const handleFollowAction = async (userId, isCurrentlyFollowing) => {
                   onClick={() => setSearchQuery(query)}
                 >
                   <FontAwesomeIcon icon={faSearch} className="recent-search-icon" />
-                  {query}
+                  {query.slice(0, 50) + '...'}
                 </span>
                 <FontAwesomeIcon
                   icon={faTimes}

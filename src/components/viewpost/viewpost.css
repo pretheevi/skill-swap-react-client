@@ -2,12 +2,12 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%; height: 100%;
+  width: 100%; 
+  height: 100%;
   padding: 0px; 
   margin: 0px;
   background-color: var(--bg-surface);
   box-shadow: var(--shadow-card);
-  z-index: 9990;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -16,7 +16,8 @@
   width: 100%;
   height: 100%;
   padding: 0; margin: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
   position: relative;
 }
@@ -24,21 +25,17 @@
 .viw-media-container {
   display: flex;
   flex-direction: column;
-  height: 100%; /* Ensure container takes full height */
   overflow: hidden;
+  padding: 0px;
 }
 
 .viw-media-container > main {
-  position: relative;
-  flex: 1.5;
-  min-height: 0; /* Important for flex children to respect parent height */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
-  height: 100%; /* Take full height of parent */
 }
+
 
 .viw-back-btn{
   background: var(--color-purple-600);
@@ -52,11 +49,17 @@
 
 .viw-carousel {
   width: 100%;
-  height: 100%; /* Take full height of parent */
+  height: 100%; 
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .viw-carousel {
+    height: 900px;
+  }
 }
 
 .viw-carousel .carousel-inner {
@@ -82,7 +85,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--bg-purple-soft) 0%, var(--bg-pink-soft) 100%);
+  /* background: linear-gradient(135deg, var(--bg-purple-soft) 0%, var(--bg-pink-soft) 100%); */
 }
 
 /* media fills container without resizing parent */
@@ -153,8 +156,6 @@
 .viw-media-container > footer {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
   padding: 16px 20px;
   background: var(--bg-surface);
   border-top: 1px solid var(--color-purple-100);
@@ -163,6 +164,7 @@
 
 .viw-actions {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 20px;
   padding: 4px 0;
@@ -179,24 +181,6 @@
   padding: 6px 10px;
   border-radius: var(--radius-sm);
 }
-
-/* .viw-actions > div:hover {
-  background: var(--color-purple-100);
-  transform: translateY(-2px);
-}
-
-.viw-actions > div:active {
-  transform: translateY(0);
-} */
-
-/* Individual action hover colors */
-/* .viw-actions > div:first-child:hover {
-  color: var(--color-pink-500);
-}
-
-.viw-actions > div:first-child:hover svg {
-  filter: drop-shadow(0 2px 4px rgba(232, 166, 195, 0.4));
-} */
 
 .viw-actions > div:nth-child(2):hover {
   color: var(--color-purple-600);
@@ -233,15 +217,7 @@
 
 /* Description section */
 .viw-description {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-  padding: 8px 4px 8px 0;
   font-size: var(--font-size-md);
-  line-height: 1.6;
-  color: var(--text-primary);
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-purple-300) var(--color-purple-100);
 }
 
 /* Custom scrollbar for description */

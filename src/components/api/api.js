@@ -16,4 +16,4 @@ API.interceptors.request.use((config) => {
 export default API;
 
 // http://localhost:8080/api
-// "https://insta-mirror-server.onrender.com"
+// "https://insta-mirror-server.onrender.com/api"

@@ -210,7 +210,8 @@ html, body {
   justify-content: space-between;
   align-items: center;
   box-sizing: border-box;
-  padding: 5px
+  padding: 10px 10px;
+  box-shadow: var(--shadow-card);
 }
 
 .main-header-input{
@@ -223,7 +224,6 @@ html, body {
 .main-header-logo{
   width: 35px;
   height: 35px;
-  margin-left: 20px;
 }
 
 .main-header-logo > img {
@@ -299,6 +299,16 @@ html, body {
     filter 0.25s ease;
 }
 
+@media (max-width: 768px) {
+  .bg-main-bar{
+    padding: 0px;
+  }
+  .main-header-create-post-btn{
+    padding: 5px;
+
+  }
+}
+
 .main-header-create-post-btn:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-card-hover);
@@ -370,7 +380,6 @@ html, body {
 
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
 
 .card:hover {
@@ -400,8 +409,10 @@ html, body {
 
 /* MEDIA (BOOTSTRAP CAROUSEL) */
 .card-media {
-  flex: 1;
-  min-height: 0; /* VERY IMPORTANT */
+  flex: 1 1 0;
+  min-height: 0; 
+  overflow: hidden;
+  position: relative;
 }
 
 .carousel,

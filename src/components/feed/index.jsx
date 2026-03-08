@@ -130,7 +130,7 @@ function Feed() {
                     <span>{card.like_count}</span>
                   </div>
                   <div
-                    onClick={() => navigate(`/viewpost/${card.skill_id}?isHome=true`)}>
+                    onClick={() => navigate(`/viewpost/${card.skill_id}?isHome=false`)}>
                     <FontAwesomeIcon icon={faMessage} />
                     <span>{card.comment_count}</span>
                   </div>

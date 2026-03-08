@@ -16,6 +16,7 @@ function Auth(props) {
     login: true,
     register: false,
   });
+  const [loading, setLoading] = useState(false);
   
   const [form, setForm] = useState({
     name: '',
@@ -92,6 +93,7 @@ function Auth(props) {
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     
     const payload = {
       email: form.email,
@@ -108,11 +110,14 @@ function Auth(props) {
     } catch (error) {
       console.log(error.response);
       toast.error(error.response.data.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     if (form.password !== form.confirmPassword) {
       console.log('password mismatch');
@@ -134,6 +139,8 @@ function Auth(props) {
     } catch (error) {
       console.log(error.response);
       toast.error(error.response.data.message);
+    } finally {
+      setLoading(true);
     }
   };
 
