@@ -199,7 +199,6 @@ const handleFollowAction = async (userId, isCurrentlyFollowing) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            autoFocus
           />
           
           {searchQuery && (

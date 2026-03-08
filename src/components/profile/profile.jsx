@@ -261,7 +261,7 @@ function Profile() {
                   <article
                     key={card.skill_id}
                     className="card prf-card"
-                    onClick={() => navigate(`/viewpost/${card.skill_id}?isHome=false`)}
+                    onClick={() => navigate(`/feed/viewpost/${card.skill_id}?isHome=false`)}
                     style={{ gridRow: `span ${RATIO_TO_SPAN[card.media_ratio]}` }}
                   >
                     <main className="card-media prf-card-media">
