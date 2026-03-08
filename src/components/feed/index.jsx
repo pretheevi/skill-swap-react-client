@@ -57,7 +57,7 @@ function Feed() {
               style={{ gridRow: `span ${RATIO_TO_SPAN[card.media_ratio]}` }}
             >
               <header className="card-header" 
-              onClick={() => navigate(`/profile/${card.user_id}`)}>
+              onClick={() => navigate(`/feed/profile/${card.user_id}`)}>
                 <img
                   src={card.user_avatar || '/avatar.jpg'}
                   alt="profile"
@@ -130,7 +130,7 @@ function Feed() {
                     <span>{card.like_count}</span>
                   </div>
                   <div
-                    onClick={() => navigate(`/viewpost/${card.skill_id}?isHome=false`)}>
+                    onClick={() => navigate(`/feed/viewpost/${card.skill_id}?isHome=false`)}>
                     <FontAwesomeIcon icon={faMessage} />
                     <span>{card.comment_count}</span>
                   </div>

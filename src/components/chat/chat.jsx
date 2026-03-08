@@ -1,4 +1,3 @@
-import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChevronLeft,
@@ -8,13 +7,10 @@ import {
   faPaperPlane,
   faFaceSmile,
 } from '@fortawesome/free-solid-svg-icons';
-import { faBell } from '@fortawesome/free-regular-svg-icons';
-import { NavigateContext } from '../../context/NavigateContext';
 import './chat.css';
+import { useNavigate } from 'react-router-dom';
 
 function Chat() {
-  const { handleNavigation } = useContext(NavigateContext);
-
   // Mock data
   const chatList = [
     {
@@ -109,6 +105,7 @@ function Chat() {
     },
   ];
 
+  const navigate = useNavigate();
   return (
     <div className="row w-100 h-100 p-0 m-0">
       {/* Chat List Sidebar */}
@@ -118,7 +115,7 @@ function Chat() {
             <FontAwesomeIcon
               icon={faChevronLeft}
               className="chat-toggle-icon"
-              onClick={() => handleNavigation('feed')}
+              onClick={() => navigate('/feed')}
             />
             <h1 className="chat-title">Chat</h1>
           </div>

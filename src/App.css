@@ -211,7 +211,6 @@ html, body {
   align-items: center;
   box-sizing: border-box;
   padding: 10px 10px;
-  box-shadow: var(--shadow-card);
 }
 
 .main-header-input{
@@ -380,6 +379,15 @@ html, body {
 
   display: flex;
   flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .main-header{
+    box-shadow: var(--shadow-card);
+  }
+  .card {
+    border-radius: 0px !important;
+  }
 }
 
 .card:hover {

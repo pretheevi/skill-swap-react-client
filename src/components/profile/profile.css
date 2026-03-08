@@ -19,25 +19,6 @@
   box-sizing: border-box;
 }
 
-.prf-wrapper::-webkit-scrollbar{
-  width: 8px;
-}
-
-.prf-wrapper::-webkit-scrollbar-track{
-  background: transparent;
-}
-
-.prf-wrapper::-webkit-scrollbar-thumb{
-  background-color: var(--color-purple-500);
-  border-radius: 10px;
-}
-
-.prf-wrapper::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-purple-600);
-  cursor: pointer;
-}
-
-
 /* PROFILE CARD */
 .prf-container{
   padding: 10px;
@@ -192,37 +173,36 @@
 
 
 .prf-feed-container{
-  padding: 10px;
+  padding: 0px;
   max-height: 100%;
-  overflow-y: auto;
-}
-
-.prf-feed-container::-webkit-scrollbar{
-  width: 8px;
-}
-
-.prf-feed-container::-webkit-scrollbar-track{
-  background: transparent;
-}
-
-.prf-feed-container::-webkit-scrollbar-thumb{
-  background-color: var(--color-purple-500);
-  border-radius: 10px;
-}
-
-.prf-feed-container::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-purple-600);
-  cursor: pointer;
 }
 
 .prf-feed-masonry{
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 4fr));
-  grid-auto-rows: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-auto-rows: auto;
   gap: 1rem;
   padding-bottom: 10rem;
 }
 
+.prf-card{
+  cursor: pointer;
+}
+
+.prf-card-media{
+  object-fit: contain;
+}
+
 .skill-liked-icon{
   color: #ff4d4d;
+}
+
+@media (max-width: 768px) {
+  .main-profile-container{
+    padding: 0px;
+  }
+  .prf-feed-masonry {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0;
+  }
 }

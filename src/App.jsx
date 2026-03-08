@@ -1,29 +1,24 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSearch,
-  faPlus,
-  faShare,
-  faSave,
   faHome,
   faGear,
   faDoorOpen,
 } from '@fortawesome/free-solid-svg-icons';
-import { faBell, faMessage, faHeart } from '@fortawesome/free-regular-svg-icons';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import API from './components/api/api';
 
 import './App.css';
 import { AuthContext } from './context/AuthContext';
-import { NavigateContext } from './context/NavigateContext';
 import { FeedContext } from './context/FeedContext';
 import Auth from './components/auth/auth';
-import Feed from './components/feed';
+import FeedLayout from './components/FeedLayout/feedLayout';
 import Chat from './components/chat/chat';
 import Post from './components/posts/post';
 import Explore from './components/explore';
@@ -140,7 +135,7 @@ function App() {
 
                   <div
                     className="dash-profile-card"
-                    onClick={() => navigate(`/profile/${user.id}`)}
+                    onClick={() => navigate(`/feed/profile/${user.id}`)}
                   >
                     <img
                       src={user?.avatar || '/avatar.jpg'}
@@ -177,7 +172,7 @@ function App() {
                     </div>
                     <div
                       className="dash-navbar-item"
-                      onClick={() => navigate('/explore')}
+                      onClick={() => navigate('/feed/explore')}
                     >
                       <FontAwesomeIcon icon={faSearch} />
                       <p>Explore</p>
@@ -202,75 +197,53 @@ function App() {
 
                   <Routes>
                     <Route path="/" element={<Navigate to="/feed" replace />} />
-                    <Route
-                      path='/feed'
-                      element={
-                        <>
-                          <header className="main-header d-flex d-lg-flex">
-                            <div className="main-header-logo d-flex d-lg-none">
-                              <img src="/logo.png" alt="logo-image" />
-                            </div>
-                            <div className="da-actions d-flex justify-content-center align-items-center gap-2 ms-auto">
-                              <FontAwesomeIcon icon={faBell} className="main-header-bell-icon" />
-                              <div data-name="chat" onClick={() => navigate('/chat')}>
-                                <FontAwesomeIcon icon={faMessage} className="main-header-message-icon" />
-                              </div>
-                              <button
-                                className="main-header-create-post-btn d-flex justify-content-center align-items-center gap-2"
-                                onClick={() => setCreatePost(true)}
-                              >
-                                <FontAwesomeIcon icon={faPlus} className="main-header-plus-icon" />
-                                <span>Create Post</span>
-                              </button>
-                            </div>
-                          </header>
-                          <main className="uid main-feed-card">
-                            <Feed />
-                          </main>
-                        </>
-                      }
-                    />
+                    
+                    <Route path='/feed' element={<FeedLayout setCreatePost={setCreatePost} />}>
+                   
+                      <Route
+                        path='/feed/chat'
+                        element={
+                          <div className="container-fluid da-chat">
+                            <Chat />
+                          </div>
+                        }
+                      />
 
-                    <Route
-                      path='/chat'
-                      element={
-                        <div className="container-fluid da-chat">
-                          <Chat />
-                        </div>
-                      }
-                    />
-                    <Route
-                      path='/post'
-                      element={
-                        <div className="container-fluid da-post">
-                          <Post />
-                        </div>}
-                    />
+                      <Route
+                        path='/feed/post'
+                        element={
+                          <div className="container-fluid da-post">
+                            <Post />
+                          </div>}
+                      />
 
-                    <Route
-                      path='/profile/:user_id'
-                      element={
-                        <div className="container-fluid main-profile-container">
-                          <Profile user={user} />
-                        </div>}
-                    />
+                      <Route
+                        path='/feed/profile/:user_id'
+                        element={
+                          <div className="container-fluid main-profile-container">
+                            <Profile user={user} />
+                          </div>}
+                      />
 
-                    <Route
-                      path='/viewpost/:skill_id'
-                      element={
-                        <div className="container-fluid main-viewpost-container">
-                          <Viewpost isHome={false} />
-                        </div>}
-                    />
+                      <Route
+                        path='/feed/viewpost/:skill_id'
+                        element={
+                          <div className="container-fluid main-viewpost-container">
+                            <Viewpost isHome={false} />
+                          </div>}
+                      />
 
-                    <Route
-                      path="/explore"
-                      element={
-                        <div className="container-fluid main-explore-container">
-                          <Explore />
-                        </div>
-                      }
-                    />
+                      <Route
+                        path="/feed/explore"
+                        element={
+                          <div className="container-fluid main-explore-container">
+                            <Explore />
+                          </div>
+                        }
+                      />
+
+                    </Route>
+
                   </Routes>
 
                   {createPost && (
@@ -289,12 +262,12 @@ function App() {
                       <FontAwesomeIcon icon={faHome} onClick={() => navigate('/feed')} />
                     </div>
                     <div className="sm-nav-action">
-                      <FontAwesomeIcon icon={faSearch} onClick={() => navigate('explore')} />
+                      <FontAwesomeIcon icon={faSearch} onClick={() => navigate('/feed/explore')} />
                     </div>
                     <div className="sm-nav-action">
                       <img
                         src={user?.avatar || '/avatar.jpg'}
-                        onClick={() => navigate(`/profile/${user?.id}`)}
+                        onClick={() => navigate(`/feed/profile/${user?.id}`)}
                         alt="profile-avatar"
                         className="sm-navbar-avatar"
                       />

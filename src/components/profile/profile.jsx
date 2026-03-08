@@ -260,23 +260,11 @@ function Profile() {
                 post.map((card) => (
                   <article
                     key={card.skill_id}
-                    className="card"
+                    className="card prf-card"
                     onClick={() => navigate(`/viewpost/${card.skill_id}?isHome=false`)}
                     style={{ gridRow: `span ${RATIO_TO_SPAN[card.media_ratio]}` }}
                   >
-                    <header className="card-header">
-                      <img
-                        src={card.user_avatar || '/avatar.jpg'}
-                        alt="profile"
-                        className="avatar d-none"
-                      />
-                      <div className="d-none">
-                        <h6 className="m-0">{card.user_name}</h6>
-                        <small>somthing</small>
-                      </div>
-                    </header>
-
-                    <main className="card-media">
+                    <main className="card-media prf-card-media">
                       <div
                         id={`carousel-${card.user_id}`}
                         className="carousel slide"
@@ -296,55 +284,8 @@ function Profile() {
                             </div>
                           ))}
                         </div>
-
-                        {card.media.length > 1 && (
-                          <>
-                            <button
-                              className="carousel-control-prev"
-                              type="button"
-                              data-bs-target={`#carousel-${card.user_id}`}
-                              data-bs-slide="prev"
-                            >
-                              <span className="carousel-control-prev-icon" />
-                            </button>
-
-                            <button
-                              className="carousel-control-next"
-                              type="button"
-                              data-bs-target={`#carousel-${card.user_id}`}
-                              data-bs-slide="next"
-                            >
-                              <span className="carousel-control-next-icon" />
-                            </button>
-                          </>
-                        )}
                       </div>
                     </main>
-
-                    <footer className="card-footer">
-                      <div className="card-actions">
-                        <div>
-                          <FontAwesomeIcon 
-                          className={`${card.user_liked ? 'skill-liked-icon' : ''}`}
-                          icon={card.user_liked ? faHeartSolid : faHeart} />
-                          <span>{card.like_count}</span>
-                        </div>
-                        <div>
-                          <FontAwesomeIcon icon={faMessage} />
-                          <span>{card.comment_count}</span>
-                        </div>
-                        <div>
-                          <FontAwesomeIcon icon={faShare} />
-                        </div>
-                        <div className="ms-auto d-none">
-                          <FontAwesomeIcon icon={faSave} />
-                        </div>
-                      </div>
-
-                      <div className="card-description d-none">
-                        {card.skill_description.slice(0, 50) + '...'}
-                      </div>
-                    </footer>
                   </article>
                 ))}
             </div>
