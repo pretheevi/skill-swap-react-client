@@ -1,208 +1,334 @@
-.main-profile-container{
+/* ── outer container ── */
+.main-profile-container {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%; height: 100%;
-  padding: 10px; margin: 0px;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
   background-color: var(--bg-surface);
   box-shadow: var(--shadow-card);
   z-index: 30;
   overflow: hidden;
   box-sizing: border-box;
+  z-index: 999;
 }
 
-.prf-wrapper{
-  width: 100%; height: 100%;
-  padding: 0; margin: 0;
+/* ── scroll wrapper ── */
+.prf-wrapper {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
+  scrollbar-width: none;
 }
 
-/* PROFILE CARD */
-.prf-container{
-  padding: 10px;
-  box-shadow: var(--card-shadow-default);
+.prf-wrapper::-webkit-scrollbar {
+  display: none;
+}
 
+/* ══════════════════════════════
+   PROFILE HEADER
+══════════════════════════════ */
+.prf-container {
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.prf-card{
+/* top row — avatar + info side by side */
+.prf-header-row {
   display: flex;
   flex-direction: row;
-  justify-content: flex-start;
-  gap: 20px;
+  align-items: flex-start;
+  gap: 18px;
 }
 
-.prf-avatar-card{
-  width: 100px; height: 100px;
-  border-radius: 10px;
+/* ── avatar ── */
+.prf-avatar-card {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
   overflow: hidden;
+  flex-shrink: 0;
+  border: 3px solid var(--bg-surface-alt);
+  background-color: var(--bg-surface-alt);
+  transition: border-color 0.2s;
 }
 
-.prf-avatar-card img{
-  width: 100%; height: 100%;
+.prf-avatar-card:hover {
+  border-color: var(--accent-primary);
+}
+
+.prf-avatar-card img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  display: block;
 }
 
-.prf-info-card{
+/* ── info column ── */
+.prf-info-card {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
+  gap: 6px;
 }
 
-.prf-info-account-name{
+.prf-info-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.prf-info-account-name {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.prf-info-username{
+.prf-info-username {
   font-size: var(--font-size-sm);
   color: var(--text-muted);
   margin: 0;
 }
 
-.prf-bio-card > p{
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.prf-count-card{
+/* icons (gear + logout) */
+.prf-info-icons {
   display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  gap: 10px;
-  max-width: 300px;
-  margin-top: 1rem;
+  gap: 14px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  flex-shrink: 0;
 }
 
-.prf-count-card > span:nth-child(2) h1 {
-  border-left: 1px solid var(--secondary-text);
-  border-right: 1px solid var(--secondary-text);
-}
-
-.prf-count-item{
-  flex: 1;
-  text-align: center;
+.prf-info-icons svg {
   cursor: pointer;
+  transition: color 0.15s;
 }
 
-.prf-count-item > p{
-  position: relative;
-  padding: 0; margin: 0;
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-}
-
-.prf-count-item > h1 {
-  padding: 0; margin: 0;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
+.prf-info-icons svg:hover {
   color: var(--text-primary);
 }
 
+/* ── stats row ── */
+.prf-count-card {
+  display: flex;
+  flex-direction: row;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 8px;
+}
+
+.prf-count-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  padding: 6px 4px;
+  border-radius: var(--radius-sm);
+  position: relative;
+  transition: background 0.15s;
+}
+
+.prf-count-item:hover {
+  background-color: var(--bg-surface-alt);
+}
+
+.prf-count-item:nth-child(2) {
+  border-left: 1px solid rgba(0, 0, 0, 0.07);
+  border-right: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.prf-count-item > h1 {
+  padding: 0;
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.prf-count-item > p {
+  position: relative;
+  padding: 0;
+  margin: 2px 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* animated underline on hover */
 .prf-count-item > p::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
-
-  width: 100%;
-  height: 3px;
+  bottom: -2px;
+  left: 10%;
+  width: 80%;
+  height: 2px;
   background: var(--accent-primary);
   border-radius: 20px;
-
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.3s ease;
+  transition: transform 0.25s ease;
 }
 
 .prf-count-item:hover > p::after {
   transform: scaleX(1);
 }
 
-.btn-card{
+/* ── bio ── */
+.prf-bio-card {
+  padding: 0;
+}
+
+.prf-bio-card p,
+.prf-bio {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── action buttons ── */
+.btn-card {
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-  gap: 20px;
+  gap: 10px;
 }
 
 .message-btn,
-.follow-btn{
-  width: 50%;
-  padding: 10px;
+.follow-btn {
+  flex: 1;
+  padding: 9px 0;
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   border: none;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.25s ease;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.15s;
 }
 
-.message-btn{
+.message-btn {
   background-color: var(--bg-surface-alt);
   color: var(--text-primary);
 }
 
-.message-btn:hover{
+.message-btn:hover {
   background-color: var(--bg-purple-soft);
+  color: var(--accent-primary);
 }
 
-.follow-btn{
-  background: linear-gradient(
-    135deg,
-    var(--color-purple-500),
-    var(--color-purple-600)
-  );
+.follow-btn {
+  background: linear-gradient(135deg, var(--color-purple-500), var(--color-purple-600));
   color: var(--text-on-purple);
 }
 
-.follow-btn:hover{
-  box-shadow: var(--shadow-card-hover);
+.follow-btn:hover {
   transform: translateY(-1px);
+  box-shadow: var(--shadow-card-hover);
+  filter: brightness(1.05);
 }
 
-
-
-
-.prf-feed-container{
-  padding: 0px;
-  max-height: 100%;
+.follow-btn.following {
+  background: var(--bg-surface-alt);
+  color: var(--text-primary);
 }
 
-.prf-feed-masonry{
+/* ══════════════════════════════
+   POST GRID  — uses .prf-post-card NOT .prf-card
+══════════════════════════════ */
+.prf-feed-container {
+  padding: 0;
+}
+
+.prf-feed-masonry {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  grid-auto-rows: auto;
-  gap: 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
   padding-bottom: 10rem;
 }
 
-.prf-card{
+/* post tile — intentionally different class from .prf-card */
+.prf-post-card {
   cursor: pointer;
+  overflow: hidden;
+  background-color: var(--bg-surface-alt);
+  position: relative;
+  aspect-ratio: 1 / 1;
 }
 
-.prf-card-media{
-  object-fit: contain;
+.prf-post-card-media {
+  width: 100%;
+  height: 100%;
 }
 
-.skill-liked-icon{
+.prf-post-card-media .carousel,
+.prf-post-card-media .carousel-inner,
+.prf-post-card-media .carousel-item {
+  height: 100%;
+  width: 100%;
+}
+
+.prf-post-card-media .carousel-item img,
+.prf-post-card-media .carousel-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* hover overlay */
+.prf-post-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  transition: background 0.2s ease;
+  pointer-events: none;
+}
+
+.prf-post-card:hover::after {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.skill-liked-icon {
   color: #ff4d4d;
 }
 
+/* ══════════════════════════════
+   RESPONSIVE
+══════════════════════════════ */
 @media (max-width: 768px) {
-  .main-profile-container{
-    padding: 0px;
+  .main-profile-container {
+    padding: 0;
   }
+
+  .prf-container {
+    padding: 14px 14px;
+  }
+
+  .prf-avatar-card {
+    width: 68px;
+    height: 68px;
+  }
+
   .prf-feed-masonry {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 0;
+    gap: 1px;
   }
 }

@@ -1,0 +1,165 @@
+
+.edt-wrapper{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--bg-surface);
+  width: 100%;
+  height: 100%;
+  border: 1px solid black;
+  margin: 0px;
+  overflow: hidden;
+  display: flex;          /* add */
+  flex-direction: column;
+  z-index: 999;
+}
+
+.edt-wrapper > .col-12 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.viw-media {
+  flex-shrink: 0;
+}
+
+/* footer always visible at bottom */
+.viw-footer {
+  flex-shrink: 0;
+  background: var(--bg-surface);
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+/* ── edit action row ── */
+.edt-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 6px;
+}
+
+.edt-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.edt-btns {
+  display: flex;
+  gap: 8px;
+}
+
+/* shared button base */
+.edt-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s, opacity 0.15s;
+  font-family: inherit;
+}
+
+.edt-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* delete button */
+.edt-delete-btn {
+  background: var(--bg-surface-alt, #f2f2f2);
+  color: var(--text-secondary, #666);
+}
+
+.edt-delete-btn:hover:not(:disabled) {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.edt-delete-btn.confirm {
+  background: #fecaca;
+  color: #dc2626;
+  animation: pulse-red 0.8s ease infinite alternate;
+}
+
+@keyframes pulse-red {
+  from { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.2); }
+  to   { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+}
+
+/* save button */
+.edt-save-btn {
+  background: var(--bg-surface-alt, #f2f2f2);
+  color: var(--text-muted, #aaa);
+}
+
+.edt-save-btn.active {
+  background: linear-gradient(135deg, var(--color-purple-500), var(--color-purple-600));
+  color: #fff;
+}
+
+.edt-save-btn.active:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* description textarea */
+.edt-description {
+  padding: 0 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edt-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--bg-surface-alt, #f0f0f0);
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-primary, #111);
+  background: var(--bg-surface-alt, #f9f9f9);
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+  line-height: 1.6;
+}
+
+.edt-textarea:focus {
+  border-color: var(--accent-primary, #6d4af8);
+  background: var(--bg-surface, #fff);
+}
+
+.edt-unsaved-hint {
+  font-size: 11px;
+  color: var(--accent-primary, #6d4af8);
+  margin: 0;
+  padding-left: 4px;
+}
+
+/* spinner */
+.edt-spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

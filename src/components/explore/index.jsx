@@ -1,72 +1,52 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faSearch, 
-  faUserPlus, 
+import {
+  faSearch,
+  faUserPlus,
   faUserMinus,
   faTimes,
-  faArrowLeft 
+  faArrowLeft,
+  faClockRotateLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 
 import API from '../api/api';
 import { AuthContext } from '../../context/AuthContext';
-import Loader from '../loader/loader';
 import './explore.css';
 
+const RECENT_KEY = 'recentProfiles';
 
 function Explore() {
   const navigation = useNavigate();
   const { user, setUser } = useContext(AuthContext);
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [recentSearches, setRecentSearches] = useState([]);
+  const [recentProfiles, setRecentProfiles] = useState([]);
 
-  // Load recent searches from localStorage
+  // load recent profiles from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('recentSearches');
-    if (saved) {
-      setRecentSearches(JSON.parse(saved).slice(0, 5));
-    }
+    const saved = localStorage.getItem(RECENT_KEY);
+    if (saved) setRecentProfiles(JSON.parse(saved).slice(0, 8));
   }, []);
 
-  // Search handler with debounce
+  // debounced search
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      if (searchQuery.trim().length >= 2) {
-        handleSearch();
-      } else if (searchQuery.trim().length === 0) {
-        setSearchResults([]);
-      }
+    const delay = setTimeout(() => {
+      if (searchQuery.trim().length >= 2) handleSearch();
+      else if (searchQuery.trim().length === 0) setSearchResults([]);
     }, 500);
-
-    return () => clearTimeout(delayDebounce);
+    return () => clearTimeout(delay);
   }, [searchQuery]);
 
   const handleSearch = async () => {
-    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
-      toast.warning('Please enter at least 2 characters');
-      return;
-    } 
-    
+    if (!searchQuery.trim() || searchQuery.trim().length < 2) return;
     setIsSearching(true);
-    
     try {
       const response = await API.get(`/searchUser?username=${encodeURIComponent(searchQuery)}`);
-      const resultUsers = response.data.users || [];
-      setSearchResults(resultUsers);
-      
-      // Save to recent searches
-      const updatedSearches = [
-        searchQuery,
-        ...recentSearches.filter(s => s !== searchQuery)
-      ].slice(0, 5);
-      
-      setRecentSearches(updatedSearches);
-      localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+      setSearchResults(response.data.users || []);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Search failed');
     } finally {
@@ -74,95 +54,51 @@ function Explore() {
     }
   };
 
-  const handleFollowAction = async (userId, isCurrentlyFollowing) => {
-      console.log('========== FOLLOW ACTION STARTED ==========');
-      console.log('Timestamp:', new Date().toISOString());
-      console.log('User ID:', userId);
-      console.log('Currently Following:', isCurrentlyFollowing);
-      console.log('Current search results count:', searchResults.length);
-      
-      // Find the user in current results for logging
-      const targetUser = searchResults.find(u => u.id === userId);
-      console.log('Target user details:', targetUser ? {
-        name: targetUser.name,
-        username: targetUser.username,
-        currentFollowStatus: targetUser.is_following
-      } : 'User not found in results');
-      
-      // Store original state for rollback in case of error
-      const originalResults = [...searchResults];
-      console.log('Original results saved for rollback');
-      
-      // Optimistically update UI
-      console.log('Optimistically updating UI - toggling follow status');
-      setSearchResults(prev => {
-        const newResults = prev.map(u =>
-          u.id === userId ? { ...u, is_following: !isCurrentlyFollowing } : u
-        );
-        
-        // Log the updated user
-        const updatedUser = newResults.find(u => u.id === userId);
-        console.log('Optimistic update complete. New status:', updatedUser?.is_following);
-        
-        return newResults;
-      });
+  // save profile to recent and navigate
+  const handleProfileClick = (profileUser) => {
+    const profile = {
+      id: profileUser.id,
+      name: profileUser.name,
+      avatar: profileUser.avatar || null,
+    };
 
-      try {
-        console.log(`Making API call to ${isCurrentlyFollowing ? 'unfollow' : 'follow'} endpoint...`);
-        console.log('Request URL:', `/api/${isCurrentlyFollowing ? 'unfollow' : 'follow'}/${userId}`);
-        
-        const startTime = Date.now();
-        
-        if (isCurrentlyFollowing) {
-          await API.delete(`/follow/${userId}`);
-          setUser(prev => ({
-            ...prev,
-            following_count: prev.following_count - 1
-          }));
-          console.log('✅ Unfollow API call successful');
-        } else {
-          await API.post(`/follow/${userId}`);
-          setUser(prev => ({
-            ...prev,
-            following_count: prev.following_count + 1
-          }));
-          console.log('✅ Follow API call successful');
-        }
-        
-        const endTime = Date.now();
-        console.log(`API call completed in ${endTime - startTime}ms`);
-        
-        toast.success(`User ${isCurrentlyFollowing ? 'unfollowed' : 'followed'} successfully`);
-        console.log('Toast notification sent');
-        
-      } catch (error) {
-        console.log('❌ API call failed!');
-        console.log('Error name:', error.name);
-        console.log('Error message:', error.message);
-        console.log('Error response:', error.response?.data);
-        console.log('Error status:', error.response?.status);
-        console.log('Error headers:', error.response?.headers);
-        
-        // Rollback on error
-        console.log('Rolling back optimistic update...');
-        setSearchResults(originalResults);
-        console.log('Rollback complete - restored original results');
-        
-        toast.error(error.response?.data?.error || 'Action failed');
-        console.log('Error toast sent');
-        
-      } finally {
-        console.log('========== FOLLOW ACTION COMPLETED ==========');
-        console.log('Final search results count:', searchResults.length);
-        
-        // Log final status of the target user
-        const finalUser = searchResults.find(u => u.id === userId);
-        console.log('Final status for user:', finalUser ? {
-          id: finalUser.id,
-          name: finalUser.name,
-          is_following: finalUser.is_following
-        } : 'User not found in results');
+    const updated = [
+      profile,
+      ...recentProfiles.filter(p => p.id !== profile.id),
+    ].slice(0, 8);
+
+    setRecentProfiles(updated);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
+    navigation(`/feed/profile/${profile.id}`);
+  };
+
+  const removeRecentProfile = (e, id) => {
+    e.stopPropagation();
+    const updated = recentProfiles.filter(p => p.id !== id);
+    setRecentProfiles(updated);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
+  };
+
+  const handleFollowAction = async (userId, isCurrentlyFollowing) => {
+    const originalResults = [...searchResults];
+
+    setSearchResults(prev =>
+      prev.map(u => u.id === userId ? { ...u, is_following: !isCurrentlyFollowing } : u)
+    );
+
+    try {
+      if (isCurrentlyFollowing) {
+        await API.delete(`/follow/${userId}`);
+        setUser(prev => ({ ...prev, following_count: prev.following_count - 1 }));
+      } else {
+        await API.post(`/follow/${userId}`);
+        setUser(prev => ({ ...prev, following_count: prev.following_count + 1 }));
       }
+      toast.success(`User ${isCurrentlyFollowing ? 'unfollowed' : 'followed'} successfully`);
+    } catch (error) {
+      setSearchResults(originalResults);
+      toast.error(error.response?.data?.error || 'Action failed');
+    }
   };
 
   const clearSearch = () => {
@@ -170,18 +106,13 @@ function Explore() {
     setSearchResults([]);
   };
 
-  const removeRecentSearch = (query) => {
-    const updated = recentSearches.filter(s => s !== query);
-    setRecentSearches(updated);
-    localStorage.setItem('recentSearches', JSON.stringify(updated));
-  };
-
   return (
     <div className="explore-container">
+
       {/* Header */}
       <div className="explore-header">
-        <FontAwesomeIcon 
-          icon={faArrowLeft} 
+        <FontAwesomeIcon
+          icon={faArrowLeft}
           className="explore-back-icon"
           onClick={() => navigation('/feed')}
         />
@@ -192,7 +123,6 @@ function Explore() {
       <div className="explore-search-wrapper">
         <div className="explore-search-box">
           <FontAwesomeIcon icon={faSearch} className="explore-search-icon" />
-          
           <input
             type="text"
             className="explore-search-input"
@@ -201,7 +131,6 @@ function Explore() {
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           />
-          
           {searchQuery && (
             <FontAwesomeIcon
               icon={faTimes}
@@ -212,25 +141,39 @@ function Explore() {
         </div>
       </div>
 
-      {/* Recent Searches */}
-      {!searchQuery && recentSearches.length > 0 && (
+      {/* Recent Profiles */}
+      {!searchQuery && recentProfiles.length > 0 && (
         <div className="explore-section">
-          <h2 className="explore-section-title">Recent Searches</h2>
-          <div className="explore-recent-list">
-            {recentSearches.map((query, index) => (
-              <div key={index} className="explore-recent-item">
-                <span 
-                  className="explore-recent-query"
-                  onClick={() => setSearchQuery(query)}
-                >
-                  <FontAwesomeIcon icon={faSearch} className="recent-search-icon" />
-                  {query.slice(0, 50) + '...'}
-                </span>
-                <FontAwesomeIcon
-                  icon={faTimes}
-                  className="explore-recent-remove"
-                  onClick={() => removeRecentSearch(query)}
-                />
+          <div className="explore-section-header">
+            <h2 className="explore-section-title">
+              <FontAwesomeIcon icon={faClockRotateLeft} />
+              Recent
+            </h2>
+          </div>
+          <div className="explore-recent-profiles">
+            {recentProfiles.map((profile) => (
+              <div
+                key={profile.id}
+                className="explore-recent-profile"
+                onClick={() => handleProfileClick(profile)}
+              >
+                <div className="explore-recent-avatar-wrap">
+                  <img
+                    src={profile.avatar || '/avatar.jpg'}
+                    alt={profile.name}
+                    className="explore-recent-avatar"
+                    onError={(e) => { e.target.src = '/avatar.jpg'; }}
+                  />
+                  <button
+                    className="explore-recent-remove-btn"
+                    onClick={(e) => removeRecentProfile(e, profile.id)}
+                  >
+                    <FontAwesomeIcon icon={faTimes} />
+                  </button>
+                </div>
+                <p className="explore-recent-name">
+                  {profile.name.split(' ')[0]}
+                </p>
               </div>
             ))}
           </div>
@@ -240,40 +183,29 @@ function Explore() {
       {/* Search Results */}
       {searchResults.length > 0 && (
         <div className="explore-section">
-          <h2 className="explore-section-title">
-            Search Results ({searchResults.length})
-          </h2>
+          <h2 className="explore-section-title">Results · {searchResults.length}</h2>
           <div className="explore-results-grid">
-            {searchResults.map((user) => (
-              <div key={user.id} className="explore-user-card">
+            {searchResults.map((u) => (
+              <div key={u.id} className="explore-user-card">
                 <img
-                  src={user.avatar || '/avatar.jpg'}
-                  alt={user.name}
+                  src={u.avatar || '/avatar.jpg'}
+                  alt={u.name}
                   className="explore-user-avatar"
-                  onError={(e) => {
-                    e.target.src = '/avatar.jpg';
-                  }}
+                  onClick={() => handleProfileClick(u)}
+                  onError={(e) => { e.target.src = '/avatar.jpg'; }}
                 />
-                
-                <div className="explore-user-info">
-                  <h3 className="explore-user-name">{user.name}</h3>
-                  <p className="explore-user-username"
-                  onClick={() => navigation(`/profile/${user.id}`)}
-                  >
-                    @{user.name.toLowerCase().replace(/\s+/g, '')}
+                <div className="explore-user-info" onClick={() => handleProfileClick(u)}>
+                  <h3 className="explore-user-name">{u.name}</h3>
+                  <p className="explore-user-username">
+                    @{u.name.toLowerCase().replace(/\s+/g, '')}
                   </p>
                 </div>
-
                 <button
-                  className={`explore-follow-btn ${user.is_following ? 'unfollow' : 'follow'}`}
-                  onClick={() => handleFollowAction(user.id, user.is_following)}
+                  className={`explore-follow-btn ${u.is_following ? 'unfollow' : 'follow'}`}
+                  onClick={() => handleFollowAction(u.id, u.is_following)}
                 >
-                  <FontAwesomeIcon 
-                    icon={user.is_following ? faUserMinus : faUserPlus} 
-                  />
-                  <span>
-                    {user.is_following ? 'Unfollow' : 'Follow'}
-                  </span>
+                  <FontAwesomeIcon icon={u.is_following ? faUserMinus : faUserPlus} />
+                  <span>{u.is_following ? 'Unfollow' : 'Follow'}</span>
                 </button>
               </div>
             ))}
@@ -281,7 +213,7 @@ function Explore() {
         </div>
       )}
 
-      {/* Loading State for Search */}
+      {/* Loading */}
       {isSearching && (
         <div className="explore-section">
           <p className="explore-loading-text">Searching...</p>
@@ -298,6 +230,7 @@ function Explore() {
           <p>Try searching with a different name</p>
         </div>
       )}
+
     </div>
   );
 }

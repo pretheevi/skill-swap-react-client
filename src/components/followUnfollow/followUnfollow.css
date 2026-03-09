@@ -1,0 +1,254 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
+
+.flw-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  background: #fff;
+}
+
+/* ── header ── */
+.flw-header {
+  flex-shrink: 0;
+  padding: 16px 16px 0;
+  background: #fff;
+  border-bottom: 1px solid #efefef;
+}
+
+.flw-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.flw-username {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+.flw-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #111;
+  font-size: 18px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  transition: background 0.15s;
+}
+
+.flw-close-btn:hover {
+  background: #f0f0f0;
+}
+
+/* ── tabs ── */
+.flw-tabs {
+  display: flex;
+  gap: 0;
+}
+
+.flw-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 10px 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #999;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.flw-tab.active {
+  color: #111;
+  border-bottom: 2px solid #111;
+}
+
+/* ── search ── */
+.flw-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f5f5f5;
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin: 12px 16px;
+}
+
+.flw-search-wrap svg {
+  color: #999;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.flw-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #111;
+  width: 100%;
+}
+
+.flw-search-input::placeholder {
+  color: #bbb;
+}
+
+/* ── body ── */
+.flw-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.flw-body::-webkit-scrollbar {
+  width: 0px;
+}
+
+.flw-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ── user item ── */
+.flw-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  transition: background 0.15s;
+}
+
+.flw-item:hover {
+  background: #fafafa;
+}
+
+.flw-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #f0f0f0;
+}
+
+.flw-info {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.flw-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flw-handle {
+  font-size: 13px;
+  color: #999;
+  margin: 0;
+}
+
+.flw-action-btn {
+  flex-shrink: 0;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  border: none;
+}
+
+.flw-action-btn:hover {
+  opacity: 0.8;
+}
+
+.flw-action-btn.follow {
+  background: #111;
+  color: #fff;
+}
+
+.flw-action-btn.message {
+  background: #f0f0f0;
+  color: #111;
+  border: 1px solid #dbdbdb;
+}
+
+/* ── empty state ── */
+.flw-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #999;
+  gap: 8px;
+}
+
+.flw-empty p {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* ── skeleton ── */
+.flw-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+}
+
+.sk-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  animation: shimmer 1.2s infinite;
+}
+
+.sk-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sk-line {
+  height: 12px;
+  border-radius: 6px;
+  background: #f0f0f0;
+  animation: shimmer 1.2s infinite;
+}
+
+.sk-line.short { width: 60%; }
+.sk-line.shorter { width: 40%; }
+
+@keyframes shimmer {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}

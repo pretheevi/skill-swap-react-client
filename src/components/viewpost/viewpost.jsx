@@ -10,6 +10,9 @@ import {
   faTimes,
   faArrowLeft,
   faHeart as faHeartSolid,
+  faBucket,
+  faTrash,
+  faEdit,
 } from '@fortawesome/free-solid-svg-icons';
 import { faMessage, faHeart } from '@fortawesome/free-regular-svg-icons';
 import { toast } from 'react-toastify';
@@ -28,6 +31,8 @@ function Viewpost(props) {
 
   // Context
   const { user } = useContext(AuthContext);
+  const loggedUser = user;
+
 
   // State declarations
   const [post, setPost] = useState(null);
@@ -216,6 +221,19 @@ function Viewpost(props) {
     }
   };
 
+  const deleteComment = async (commentId) => {
+    try{
+      const response = await API.delete(`/comment/${commentId}`);
+      console.log(response.data);
+      setAllComments(prev => 
+        prev.filter(cmt => cmt.id !== commentId)
+      );
+      
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   // Fetch post details on mount or when skill_id changes
   useEffect(() => {
     getPostDetails();
@@ -236,15 +254,31 @@ function Viewpost(props) {
           <main className="viw-media">
             <div className="viw-action-btn p-0">
               <button className="viw-back-btn" onClick={() => navigate(-1)}> 
-                {/* `/profile/${post.user_id}` */}
                 <FontAwesomeIcon icon={faArrowLeft} />
               </button>
             </div>
-            
+
             <div
               id={`viw-carousel-${post.id}`}
               className="carousel slide viw-carousel"
+              data-bs-ride="carousel"
             >
+              {/* dot indicators */}
+              {post.media?.length > 1 && (
+                <div className="carousel-indicators">
+                  {post.media.map((_, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      data-bs-target={`#viw-carousel-${post.id}`}
+                      data-bs-slide-to={index}
+                      className={index === 0 ? 'active' : ''}
+                      aria-current={index === 0 ? 'true' : undefined}
+                    />
+                  ))}
+                </div>
+              )}
+
               <div className="carousel-inner">
                 {post.media?.map((item, index) => (
                   <div
@@ -270,7 +304,7 @@ function Viewpost(props) {
                     data-bs-target={`#viw-carousel-${post.id}`}
                     data-bs-slide="prev"
                   >
-                    <span className="carousel-control-prev-icon"></span>
+                    <span className="carousel-control-prev-icon" />
                   </button>
                   <button
                     className="carousel-control-next"
@@ -278,7 +312,7 @@ function Viewpost(props) {
                     data-bs-target={`#viw-carousel-${post.id}`}
                     data-bs-slide="next"
                   >
-                    <span className="carousel-control-next-icon"></span>
+                    <span className="carousel-control-next-icon" />
                   </button>
                 </>
               )}
@@ -309,9 +343,14 @@ function Viewpost(props) {
               <div>
                 <FontAwesomeIcon icon={faShare} />
               </div>
-              <div className="ms-auto">
+              {loggedUser?.id !== post.user_id 
+              && <div className="ms-auto">
                 <FontAwesomeIcon icon={faSave} />
-              </div>
+              </div>}
+              {loggedUser?.id === post.user_id
+                && <div onClick={() => navigate(`/feed/editSkill/${post.id}`)}>
+                  <FontAwesomeIcon icon={faEdit} />
+                </div> }
             </div>
             
             <div className="viw-description">{post.description}</div>
@@ -331,27 +370,33 @@ function Viewpost(props) {
                   const isExpanded = expandedComments[cmt.id];
                   return (
                     <li className="viw-cmt-list-item" key={cmt.tempId || cmt.id}>
-                      <div className="viw-cmt-lst-item-prf">
+                      <div className="viw-cmt-lst-item-prf" onClick={() => navigate(`/feed/profile/${cmt.user_id}`)}>
                         <img src={cmt.user_avatar || '/avatar.jpg'} alt="" />
                       </div>
                       
                       <div className="viw-cmt-lst-item-cmt">
                         <div className='viw-cmt-lst-item-cmt-header'>
                           <h1 className='viw-cmt-username'>{cmt.user_name}</h1>
-                          <div className='d-flex flex-column justify-content-center align-items-center'>
-                              <FontAwesomeIcon 
-                                icon={cmt.user_liked ? faHeartSolid : faHeart} 
-                                  className={`viw-cmt-like-btn
-                                    ${cmt.user_liked ? 'liked' : ''}
-                                    ${heartBeatId === cmt.id ? 'heart-beat-once' : ''}
-                                  `}
-                                onClick={() => { 
-                                    if(!cmt.isTemp) { 
-                                    handleLikeComment(cmt.id, cmt.user_liked);
-                                  }
-                                }}
-                              />
-                            <p className='viw-cmt-like-count'>{cmt.like_count || 0}</p>
+                          <div className='d-flex justify-content-center align-item-center gap-2'>
+                            <div className='d-flex flex-column justify-content-center align-items-center'>
+                                <FontAwesomeIcon 
+                                  icon={cmt.user_liked ? faHeartSolid : faHeart} 
+                                    className={`viw-cmt-like-btn
+                                      ${cmt.user_liked ? 'liked' : ''}
+                                      ${heartBeatId === cmt.id ? 'heart-beat-once' : ''}
+                                    `}
+                                  onClick={() => { 
+                                      if(!cmt.isTemp) { 
+                                      handleLikeComment(cmt.id, cmt.user_liked);
+                                    }
+                                  }}
+                                />
+                              <p className='viw-cmt-like-count'>{cmt.like_count || 0}</p>
+                            </div>
+                            {( loggedUser?.id === cmt.user_id || loggedUser?.id === post.user_id)
+                            && <div className='viw-cmt-delete' onClick={() => deleteComment(cmt.id)}>
+                              <FontAwesomeIcon icon={faTrash} />
+                            </div>}
                           </div>
                         </div>
                        

@@ -1,24 +1,205 @@
-
-.card-header{
+/* ── card header ── */
+.card-header {
+  padding: 10px 12px;
+  background-color: var(--bg-surface);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
   cursor: pointer;
+  transition: background 0.15s;
 }
 
-.skill-liked-icon{
+.card-header:hover {
+  background-color: var(--bg-surface-alt);
+}
+
+.card-header > .avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid var(--bg-surface-alt);
+}
+
+.card-header-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.card-username {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.card-more-icon {
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 4px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.card-more-icon:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface-alt);
+}
+
+/* ── carousel controls ── */
+.card-media .carousel-control-prev,
+.card-media .carousel-control-next {
+  width: 30px;
+  height: 30px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.card-media:hover .carousel-control-prev,
+.card-media:hover .carousel-control-next {
+  opacity: 1;
+}
+
+.card-media .carousel-control-prev { left: 8px; }
+.card-media .carousel-control-next { right: 8px; }
+
+.card-media .carousel-control-prev-icon,
+.card-media .carousel-control-next-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* dot indicators */
+.card-indicators {
+  bottom: 6px !important;
+  margin: 0 !important;
+  gap: 4px;
+}
+
+.card-indicators [data-bs-target] {
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,0.55) !important;
+  border: none !important;
+  opacity: 1 !important;
+  transition: background 0.2s, transform 0.2s !important;
+}
+
+.card-indicators .active {
+  background: #fff !important;
+  transform: scale(1.3);
+}
+
+/* ── card footer ── */
+.card-footer {
+  padding: 10px 12px 12px;
+  background-color: var(--bg-surface);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── action buttons ── */
+.card-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+}
+
+.card-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 16px;
+  padding: 5px 7px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+  font-family: inherit;
+}
+
+.card-action-btn:hover {
+  background: var(--bg-surface-alt);
+  color: var(--text-primary);
+}
+
+.card-action-btn span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  min-width: 14px;
+}
+
+/* save pushed right */
+.card-action-save {
+  margin-left: auto;
+}
+
+/* like heart */
+.card-heart {
+  transition: color 0.15s, transform 0.15s;
+}
+
+.card-heart.liked {
   color: #ff4d4d;
 }
 
+.card-heart:hover {
+  transform: scale(1.15);
+}
+
+/* heartbeat animation */
 .heart-beat-once {
   animation: heartBeat 0.4s ease-in-out;
 }
 
 @keyframes heartBeat {
   0%   { transform: scale(1); }
-  25%  { transform: scale(1.25); }
-  50%  { transform: scale(0.95); }
-  75%  { transform: scale(1.1); }
+  25%  { transform: scale(1.4); }
+  50%  { transform: scale(0.9); }
+  75%  { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
 
-.carousel-control-prev{
-  z-index: 999;
+/* ── description ── */
+.card-description {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-desc-author {
+  font-weight: 600;
+  color: var(--text-primary);
 }
