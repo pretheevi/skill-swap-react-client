@@ -13,7 +13,7 @@ function FollowUnfollow() {
   const [searchParams] = useSearchParams();
   const tab = searchParams.get("tab");
 
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const loggedUser = user;
   const [follow, setFollow] = useState([]);
   const [search, setSearch] = useState("");
@@ -32,16 +32,22 @@ function FollowUnfollow() {
     }
   };
 
+  const [followInProgress, setFollowInProgress] = useState(false);
   const onFollow = async (is_following, user_id) => {
+    if (followInProgress) return;
     if (is_following) return;
     try {
+      setFollowInProgress(true);
       const response = await API.post(`/follow/${user_id}`);
       setFollow(prev =>
         prev.map(f => f.id === user_id ? { ...f, is_following: 1 } : f)
       );
+      setUser(prev => ({...prev, following_count: prev.following_count+1 }));
+      setFollowInProgress(false);
     } catch (error) {
       toast.error(error.response.data.message);
       console.log(error.response);
+      setFollowInProgress(false);
     }
   };
 

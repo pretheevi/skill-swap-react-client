@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 import API from '../api/api';
 import { toast } from 'react-toastify';
+import { AuthContext } from '../../context/AuthContext';
 import './post.css';
 
 function Post(props) {
+  const { setUser } = useContext(AuthContext);
   // State declarations
   const [postnav, setPostNav] = useState({
     ratio: false,
@@ -110,8 +112,11 @@ function Post(props) {
   };
 
   // Submit handler
+  const [postInPorgess, setPostInProgress] = useState(false);
   const handlePostShare = async () => {
+    if (postInPorgess) return
     try {
+      setPostInProgress(true)
       const formData = new FormData();
       formData.append('imageRatio', form.imageRatio);
       formData.append('description', form.description);
@@ -128,12 +133,15 @@ function Post(props) {
         },
       });
 
+      setUser(prev => ({...prev, posts_count: prev.posts_count + 1}))
       console.log(response.data);
       toast.success(response.data.message);
       props.setCreatePost(false);
+      setPostInProgress(false);
     } catch (error) {
       console.log(error);
       toast.error('Failed to share post');
+      setPostInProgress(false);
     }
   };
 
@@ -331,7 +339,7 @@ function Post(props) {
               ← Back
             </button>
             <button className="pst-ratio-badge" onClick={handlePostShare}>
-              Share
+              {postInPorgess? "Sharing...": "Share"}
             </button>
           </div>
 

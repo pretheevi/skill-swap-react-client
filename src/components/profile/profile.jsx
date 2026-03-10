@@ -6,12 +6,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './profile.css';
 import API from '../api/api.js';
+import { toast } from 'react-toastify';
 import { AuthContext } from '../../context/AuthContext.js';
 
 function Profile() {
   const navigate = useNavigate();
   const { user_id } = useParams();
   const loggedUser = useContext(AuthContext).user;
+  const { setUser } = useContext(AuthContext);
 
   const [profileUser, setProfileUser] = useState(null);
   const [post, setPost] = useState([]);
@@ -38,19 +40,27 @@ function Profile() {
     }
   };
 
+  const [followInProgress, setFollowInProgress] = useState(false);
   const onFollowToggle = async (is_following, user_id) => {
+    if (followInProgress) return;
     try{
+      setFollowInProgress(true);
       let response;
       if (is_following) {
         response = await API.delete(`/follow/${user_id}`);
-        setProfileUser(prev => ({...prev, is_following: false}))
+        setProfileUser(prev => ({...prev, is_following: false}));
+        setUser(prev => ({...prev, following_count: prev.following_count - 1}));
       } else {
         response = await API.post(`/follow/${user_id}`);
-        setProfileUser(prev => ({...prev, is_following: true}))
+        setProfileUser(prev => ({...prev, is_following: true}));
+        setUser(prev => ({...prev, following_count: prev.following_count + 1}));
       }
+      setFollowInProgress(false);
       console.log(response);
     } catch(error) {
       console.log(error);
+      toast.error(error.response.data.message);
+      setFollowInProgress(false);
     }
   }
 

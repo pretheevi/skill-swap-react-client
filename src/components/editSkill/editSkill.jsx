@@ -15,7 +15,7 @@ import './editSkill.css';
 
 function EditSkill() {
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const { skill_id } = useParams();
 
   const [post, setPost] = useState(null);
@@ -68,6 +68,7 @@ function EditSkill() {
     try {
       setDeleting(true);
       await API.delete(`/skills/${skill_id}`);
+      setUser(prev => ({...prev, posts_count: prev.posts_count - 1}))
       toast.success('Post deleted');
       navigate(`/feed/profile/${post.user_id}`);
     } catch (error) {
