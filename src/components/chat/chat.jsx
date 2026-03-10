@@ -171,8 +171,15 @@ useEffect(() => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const ws = new WebSocket(`ws://localhost:8080?token=${token}`);
+    const ws = new WebSocket(`wss://insta-mirror-server.onrender.com?token=${token}`);
     wsRef.current = ws;
+
+     // ping every 30 seconds to keep alive
+      const ping = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'ping' }));
+        }
+      }, 30000);
 
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data);
@@ -193,7 +200,10 @@ useEffect(() => {
       }
     };
 
-    return () => ws.close();
+     return () => {
+      clearInterval(ping);
+      ws.close();
+    };
   }, []);
 
 
