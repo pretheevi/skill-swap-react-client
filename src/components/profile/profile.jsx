@@ -131,7 +131,11 @@ function Profile() {
         {/* action buttons — only on other profiles */}
         {!isOwnProfile && profileUser && (
           <div className="btn-card">
-            <button className="message-btn">Message</button>
+            <button className="message-btn"
+              onClick={() => navigate(`/feed/chat?from=message&userId=${profileUser.id}&name=${encodeURIComponent(profileUser.name)}&avatar=${encodeURIComponent(profileUser.avatar)}`)}
+            >
+              Message
+            </button>
             <button className={`follow-btn ${profileUser?.is_following ? 'following' : ''}`}
               onClick={() => onFollowToggle(profileUser.is_following, profileUser.id)}
             >
