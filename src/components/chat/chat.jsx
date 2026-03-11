@@ -1,180 +1,180 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo, useReducer, useContext } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faChevronLeft, faSearch, faPaperPlane,
-  faFaceSmile, faPaperclip, faPhone, faVideo, faEllipsisVertical,
+  faVideo, 
+  faPhone, 
+  faSearch, 
+  faFaceSmile,
+  faPaperclip, 
+  faPaperPlane, 
+  faChevronLeft, 
+  faEllipsisVertical,
 } from '@fortawesome/free-solid-svg-icons';
-import './chat.css';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import API from '../api/api';
-import { useContext } from 'react';
-import {AuthContext} from '../../context/AuthContext';
+import { AuthContext } from '../../context/AuthContext';
+import './chat.css';
 
-function timeAgo(dateStr) {
-  if (!dateStr) return '';
-  const date = new Date(dateStr.replace(' ', 'T'));
-  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+const initialState = {
+  roomList: [],
+  selectedRoomId: null,
+  showList: true,
+  search: '',
+  messages: [],
+  message: '',
+};
 
-  if (diff < 60)       return 'just now';
-  if (diff < 3600)     return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400)    return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 604800)   return `${Math.floor(diff / 86400)}d ago`;
-  if (diff < 2592000)  return `${Math.floor(diff / 604800)}w ago`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
+const chatReducer = (state, action) => {
+  switch (action.type) {
+    case "SET_ROOMS":
+      return { ...state, roomList: action.payload };
+
+    case "SELECT_ROOM":
+      return { ...state, selectedRoomId: action.payload, showList: false };
+
+    case "SET_MESSAGES":
+      return { ...state, messages: action.payload };
+
+    case "ADD_MESSAGE":
+      return { ...state, messages: [...state.messages, action.payload] };
+
+    case "REPLACE_TEMP_MESSAGE":
+      return {
+        ...state,
+        messages: state.messages.map(m =>
+          typeof m.id === 'number' ? action.payload : m
+        )
+      };
+
+    case "UPDATE_ROOM_LAST_MESSAGE":
+      return {
+        ...state,
+        roomList: state.roomList.map(r =>
+          r.room_id === action.payload.room_id
+            ? { ...r, last_message: action.payload.text }
+            : r
+        )
+      };
+
+    case "SET_MESSAGE_INPUT":
+      return { ...state, message: action.payload };
+
+    case "SET_SEARCH":
+      return { ...state, search: action.payload };
+
+    case "HANDLE_BACK":
+      return { ...state, showList: true, selectedRoomId: null };
+
+    default:
+      return state;
+  }
+};
 
 function Chat() {
-  const loggedUserId = useContext(AuthContext).user?.id;
-
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-
   const fromMessage = searchParams.get('from') === 'message';
   const targetUserId = searchParams.get('userId');
   const targetName   = searchParams.get('name');
   const targetAvatar = searchParams.get('avatar');
+  const loggedUserId = useContext(AuthContext).user?.id;
+  const [state, dispatch] = useReducer(chatReducer, initialState);
+  const { roomList, selectedRoomId, showList, search, messages, message } = state;
+  const wsRef = useRef(null);
+  const messagesEndRef = useRef(null);
+   
 
-  const [roomList, setRoomList] = useState([]);
-  const [selectedRoomId, setSelectedRoomId] = useState(null);
-  const [showList, setShowList]     = useState(true);
-  const [search, setSearch]         = useState('');
-
-  const [messages, setMessages] = useState([]);  // array, not string
-  const [message, setMessage] = useState(''); 
-
-  // if redirected from message button, open that user's chat directly
-  useEffect(() => {
-    if (fromMessage && targetUserId) {
-      console.log(fromMessage, targetUserId)
-      // check if room already exists in list
-      const existing = roomList.find(c => String(c.id) === targetUserId);
-      if (existing) {
-        setSelectedRoomId(existing.id);
-      } else {
-        // new conversation — create a temporary entry
-        setSelectedRoomId(targetUserId);
-      }
-      setShowList(false); // on mobile, go straight to chat
-    }
-  }, [fromMessage, targetUserId]);
-
-  // 3. selected — match by room_id
-  const selected = roomList.find(c => c.room_id === selectedRoomId) ||
-    (selectedRoomId ? { room_id: selectedRoomId, other_user_name: targetName, other_user_avatar: targetAvatar, id: targetUserId } : null);
-  
-  // 1. filtered — guard against empty list
-  const filtered = roomList.filter(c =>
-    c.other_user_name?.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const fetchRoomConversation = async (roomId) => {
-    try {
-      const response = await API.get(`/chat/room/conversation/${roomId}`);
-      console.log('aaaaaa', response);
-      setMessages(response.data.roomConversation);
-    } catch(error) {
-      console.log(error);
-    }
-  }
-
-  // 2. handleSelect — use room_id
-  const handleSelect = (roomId) => {
-    console.log('selected room id', roomId)
-    setSelectedRoomId(roomId);
-    setShowList(false);
-  };
-
-  const handleBack = () => {
-    setShowList(true);
-    setSelectedRoomId(null);
-    // clear query params when going back to list
-    navigate('/feed/chat', { replace: true });
-  };
+  const selected = useMemo(() =>
+    roomList.find(c => c.room_id === selectedRoomId) ||
+    (selectedRoomId ? {
+      room_id: selectedRoomId,
+      other_user_name: targetName,
+      other_user_avatar: targetAvatar,
+      other_user_id: targetUserId
+    } : null)
+  , [roomList, selectedRoomId, targetName, targetAvatar, targetUserId]);
+    
+  const filtered =  useMemo(() => 
+    roomList.filter(c =>
+      c.other_user_name?.toLowerCase().includes(search.toLowerCase())
+    )
+  , [roomList, search]);
 
   const fetchAllRooms = async () => {
     try{
       const response = await API.get('/chat/rooms');
-      console.log(response);
-      setRoomList(response.data.rooms);
+      dispatch({ type: "SET_ROOMS", payload: response.data.rooms });
     } catch(error) {
       console.log(error);
     }
   }
 
-  useEffect(() => {
-    fetchAllRooms();
-  }, [])
+  const onRoomSelect = (roomId) => {
+    dispatch({ type: "SELECT_ROOM", payload: roomId });
+  };
 
-useEffect(() => {
-  if (selectedRoomId) fetchRoomConversation(selectedRoomId);
-}, [selectedRoomId]);
+  const handleRoomBack = () => {
+    dispatch({ type: "HANDLE_BACK" });
+    navigate('/feed/chat', { replace: true });
+  };
 
-
-  const handleMessaageInput = (e) => {
-    const {value} = e.target;
-    setMessage(value);
+  const fetchRoomConversations = async (roomId) => {
+    try {
+      const response = await API.get(`/chat/room/conversation/${roomId}`);
+      dispatch({ type: "SET_MESSAGES", payload: response.data.roomConversation });
+    } catch(error) {
+      console.log(error);
+    }
   }
 
-  // const sendMessage = async () => {
-  //   try{
-  //     const payload = {
-  //       receiver_id: selected.other_user_id || selected.id,
-  //       text: message.trim()
-  //     }
+  const handleNewMessaageInput = (e) => {
+    dispatch({ type: "SET_MESSAGE_INPUT", payload: e.target.value });
+  }
 
-  //     const response = await API.post('/chat/send', payload);
-  //     console.log(response.data.data)
-  //     const data = response.data.data;
-  //     const newMessage = {
-  //       id: data.message.id,
-  //       room_id: data.room.id,
-  //       sender_id: data.message.sender_id,
-  //       text: data.message.text,
-  //       is_read: data.message.is_read,
-  //       created_at: data.message.created_at,
-  //     }
-  //     console.log(messages)
-  //     setMessages(prev => [...prev, newMessage])
-  //     setRoomList(prev => prev.map(r =>
-  //       r.room_id === selectedRoomId
-  //         ? { ...r, last_message: message.trim(), last_message_at: new Date().toISOString() }
-  //         : r
-  //     ));
-  //     setMessage('');
-  //   } catch(error){
-  //     console.log(error);
-  //   }
-  // }
-
-  const sendMessage = async () => {
+  const onSendNewMessage = async () => {
     if (!message.trim()) return;
-
-    // optimistic UI
     const tempMsg = {
       id: Date.now(),
       sender_id: loggedUserId,
       text: message.trim(),
       created_at: new Date().toISOString(),
     };
-    setMessages(prev => [...prev, tempMsg]);
-    setMessage('');
-
-    // send via WS — server saves to DB and forwards to receiver
+    dispatch({ type: "ADD_MESSAGE", payload: tempMsg });
+    dispatch({ type: "SET_MESSAGE_INPUT", payload: '' });
     wsRef.current?.send(JSON.stringify({
       receiver_id: selected.other_user_id || selected.id,
       text: tempMsg.text,
     }));
   };
 
-
-  const wsRef = useRef(null);
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   useEffect(() => {
+    if (selectedRoomId) fetchRoomConversations(selectedRoomId);
+  }, [selectedRoomId]);
+
+  useEffect(() => {
+    if (fromMessage && targetUserId) {
+      const existing = roomList.find(c => String(c.id) === targetUserId);
+      dispatch({ type: "SELECT_ROOM", payload: existing ? existing.id : targetUserId });
+    }
+  }, [fromMessage, targetUserId]);
+
+
+  useEffect(() => {
+    fetchAllRooms();
+
     const token = localStorage.getItem('token');
-    const ws = new WebSocket(`wss://insta-mirror-server.onrender.com?token=${token}`);
+    const wsUrl = [
+      `wss://insta-mirror-server.onrender.com?token=${token}`,
+      `ws://localhost:8080?token=${token}`
+    ]
+    const ws = new WebSocket(wsUrl[0]);
     wsRef.current = ws;
 
-     // ping every 30 seconds to keep alive
+      // ping every 30 seconds to keep alive
       const ping = setInterval(() => {
         if (ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify({ type: 'ping' }));
@@ -185,33 +185,20 @@ useEffect(() => {
       const data = JSON.parse(e.data);
       if (data.type === 'message') {
         // received from other person
-        setMessages(prev => [...prev, data.message]);
-        setRoomList(prev => prev.map(r =>
-          r.room_id === data.message.room_id
-            ? { ...r, last_message: data.message.text }
-            : r
-        ));
+        dispatch({ type: "ADD_MESSAGE", payload: data.message });
+        dispatch({ type: "UPDATE_ROOM_LAST_MESSAGE", payload: data.message });
       }
       if (data.type === 'sent') {
         // replace temp message with real one from DB
-        setMessages(prev => prev.map(m =>
-          typeof m.id === 'number' ? data.message : m  // replace temp id
-        ));
+        dispatch({ type: "REPLACE_TEMP_MESSAGE", payload: data.message });
       }
     };
 
-     return () => {
-      clearInterval(ping);
-      ws.close();
-    };
+    return () => {
+    clearInterval(ping);
+    ws.close();
+  };
   }, []);
-
-
-  
-  const messagesEndRef = useRef(null);
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
 
   return (
     <div className="chat-root">
@@ -220,7 +207,7 @@ useEffect(() => {
       <aside className={`chat-sidebar ${showList ? 'mobile-show' : 'mobile-hide'}`}>
 
         <div className="chat-sidebar-header">
-          <button className="ch-back-btn" onClick={() => navigate('/feed')}>
+          <button className="ch-back-btn" onClick={() => navigate(-1)}>
             <FontAwesomeIcon icon={faChevronLeft} />
           </button>
           <h2 className="chat-title">Messages</h2>
@@ -232,7 +219,7 @@ useEffect(() => {
             type="text"
             placeholder="Search..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => dispatch({ type: "SET_SEARCH", payload: e.target.value })}
           />
         </div>
 
@@ -241,7 +228,7 @@ useEffect(() => {
             <li
               key={chat.room_id}
               className={`chat-list-item ${selectedRoomId === chat.room_id ? 'active' : ''}` }
-              onClick={() => handleSelect(chat.room_id)}
+              onClick={() => onRoomSelect(chat.room_id)}
             >
               <div className="clt-avatar-wrap">
                 <img src={chat.other_user_avatar || '/avatar.jpg'} alt={chat.other_user_name} className="clt-avatar" />
@@ -271,7 +258,7 @@ useEffect(() => {
           <>
             {/* header */}
             <header className="ch-header">
-              <button className="ch-back-btn d-lg-none" onClick={handleBack}>
+              <button className="ch-back-btn d-lg-none" onClick={handleRoomBack}>
                 <FontAwesomeIcon icon={faChevronLeft} />
               </button>
               <img src={selected?.other_user_avatar || '/avatar.jpg'} alt={selected?.other_user_name} className="ch-avatar"
@@ -323,12 +310,12 @@ useEffect(() => {
                   placeholder="Message..." 
                   className="ch-input"
                   value={message}
-                  onChange={handleMessaageInput} />
+                  onChange={handleNewMessaageInput} />
                 <button className="ch-icon-btn ch-emoji-btn">
                   <FontAwesomeIcon icon={faFaceSmile} />
                 </button>
               </div>
-              <button className="ch-send-btn" onClick={sendMessage} disabled={!message.trim()}>
+              <button className="ch-send-btn" onClick={onSendNewMessage} disabled={!message.trim()}>
                 <FontAwesomeIcon icon={faPaperPlane} />
               </button>
             </footer>
@@ -337,6 +324,22 @@ useEffect(() => {
       </div>
     </div>
   );
+}
+
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const normalized = dateStr.replace(' ', 'T');
+  // append Z if no timezone info — forces UTC parsing
+  const date = new Date(normalized.endsWith('Z') ? normalized : normalized + 'Z');
+  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+
+  if (diff < 60)      return 'just now';
+  if (diff < 3600)    return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400)   return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800)  return `${Math.floor(diff / 86400)}d ago`;
+  if (diff < 2592000) return `${Math.floor(diff / 604800)}w ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 export default Chat;

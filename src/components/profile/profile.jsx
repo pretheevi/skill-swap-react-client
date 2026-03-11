@@ -1,30 +1,60 @@
-import React, { useContext, useState, useEffect } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear, faDoorOpen } from '@fortawesome/free-solid-svg-icons';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import './profile.css';
-import API from '../api/api.js';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../../context/AuthContext.js';
+import API from '../api/api.js';
+import './profile.css';
+
+const initialState = {
+  profileUser: null,
+  posts: [],
+  followInProgress: false,
+};
+
+const profileReducer = (state, action) => {
+  switch (action.type) {
+    case "SET_PROFILE":
+      return { ...state, profileUser: action.payload };
+
+    case "SET_POSTS":
+      return {
+        ...state,
+        posts: action.payload,
+        profileUser: { ...state.profileUser, skill_count: action.payload.length }
+      };
+
+    case "SET_FOLLOW_PROGRESS":
+      return { ...state, followInProgress: action.payload };
+
+    case "TOGGLE_FOLLOW":
+      return {
+        ...state,
+        followInProgress: false,
+        profileUser: { ...state.profileUser, is_following: action.payload }
+      };
+
+    default:
+      return state;
+  }
+};
 
 function Profile() {
   const navigate = useNavigate();
   const { user_id } = useParams();
-  const loggedUser = useContext(AuthContext).user;
-  const { setUser } = useContext(AuthContext);
 
-  const [profileUser, setProfileUser] = useState(null);
-  const [post, setPost] = useState([]);
+  // single useContext call instead of two
+  const { user: loggedUser, setUser } = useContext(AuthContext);
+  const [state, dispatch] = useReducer(profileReducer, initialState);
+  const { profileUser, posts, followInProgress } = state;
 
   const isOwnProfile = profileUser && loggedUser && profileUser.id === loggedUser.id;
 
   const getUserProfile = async () => {
     try {
       const response = await API.get(`/profileById/${user_id}`);
-      if (response.data) setProfileUser(response.data);
-      console.log(response.data);
+      if (response.data) dispatch({ type: "SET_PROFILE", payload: response.data });
     } catch (error) {
       console.log('Error fetching user profile:', error);
     }
@@ -33,36 +63,31 @@ function Profile() {
   const getAllPost = async () => {
     try {
       const response = await API.get(`/my-skillsById/${profileUser.id}`);
-      setPost(response.data);
-      setProfileUser(prev => ({ ...prev, skill_count: response.data.length }));
+      dispatch({ type: "SET_POSTS", payload: response.data });
     } catch (error) {
       console.log(error);
     }
   };
 
-  const [followInProgress, setFollowInProgress] = useState(false);
-  const onFollowToggle = async (is_following, user_id) => {
+  const onFollowToggle = async (is_following, userId) => {
     if (followInProgress) return;
-    try{
-      setFollowInProgress(true);
-      let response;
+    dispatch({ type: "SET_FOLLOW_PROGRESS", payload: true });
+    try {
       if (is_following) {
-        response = await API.delete(`/follow/${user_id}`);
-        setProfileUser(prev => ({...prev, is_following: false}));
-        setUser(prev => ({...prev, following_count: prev.following_count - 1}));
+        await API.delete(`/follow/${userId}`);
+        dispatch({ type: "TOGGLE_FOLLOW", payload: false });
+        setUser(prev => ({ ...prev, following_count: prev.following_count - 1 }));
       } else {
-        response = await API.post(`/follow/${user_id}`);
-        setProfileUser(prev => ({...prev, is_following: true}));
-        setUser(prev => ({...prev, following_count: prev.following_count + 1}));
+        await API.post(`/follow/${userId}`);
+        dispatch({ type: "TOGGLE_FOLLOW", payload: true });
+        setUser(prev => ({ ...prev, following_count: prev.following_count + 1 }));
       }
-      setFollowInProgress(false);
-      console.log(response);
-    } catch(error) {
+    } catch (error) {
       console.log(error);
       toast.error(error.response.data.message);
-      setFollowInProgress(false);
+      dispatch({ type: "SET_FOLLOW_PROGRESS", payload: false });
     }
-  }
+  };
 
   useEffect(() => { getUserProfile(); }, [user_id]);
   useEffect(() => { if (profileUser?.id) getAllPost(); }, [profileUser?.id]);
@@ -73,9 +98,7 @@ function Profile() {
       {/* ── profile header ── */}
       <div className="col-12 prf-container">
 
-        {/* top row: avatar + info */}
         <div className="prf-header-row">
-
           <div className="prf-avatar-card">
             <img src={profileUser?.avatar || '/avatar.jpg'} alt="avatar" />
           </div>
@@ -88,30 +111,24 @@ function Profile() {
                   <FontAwesomeIcon icon={faGear} />
                   <FontAwesomeIcon
                     icon={faDoorOpen}
-                    onClick={() => {
-                      localStorage.removeItem('token');
-                      window.location.reload();
-                    }}
+                    onClick={() => { localStorage.removeItem('token'); window.location.reload(); }}
                   />
                 </div>
               )}
             </div>
 
-            {/* stats */}
             <div className="prf-count-card">
               <span className="prf-count-item">
                 <h1>{profileUser?.skill_count || 0}</h1>
                 <p>posts</p>
               </span>
-              <span
-                className="prf-count-item"
+              <span className="prf-count-item"
                 onClick={() => navigate(`/feed/followUnfollow/${profileUser?.id}?tab=followers`)}
               >
                 <h1>{profileUser?.followers_count || 0}</h1>
                 <p>followers</p>
               </span>
-              <span
-                className="prf-count-item"
+              <span className="prf-count-item"
                 onClick={() => navigate(`/feed/followUnfollow/${profileUser?.id}?tab=following`)}
               >
                 <h1>{profileUser?.following_count || 0}</h1>
@@ -121,14 +138,12 @@ function Profile() {
           </div>
         </div>
 
-        {/* bio — full width below avatar+info row */}
         {profileUser?.bio && (
           <div className="prf-bio-card">
             <p className="prf-bio">{profileUser.bio}</p>
           </div>
         )}
 
-        {/* action buttons — only on other profiles */}
         {!isOwnProfile && profileUser && (
           <div className="btn-card">
             <button className="message-btn"
@@ -136,8 +151,10 @@ function Profile() {
             >
               Message
             </button>
-            <button className={`follow-btn ${profileUser?.is_following ? 'following' : ''}`}
+            <button
+              className={`follow-btn ${profileUser?.is_following ? 'following' : ''}`}
               onClick={() => onFollowToggle(profileUser.is_following, profileUser.id)}
+              disabled={followInProgress}
             >
               {profileUser?.is_following ? 'Following' : 'Follow'}
             </button>
@@ -148,29 +165,21 @@ function Profile() {
       {/* ── post grid ── */}
       <div className="col-12 prf-feed-container">
         <div className="prf-feed-masonry">
-          {post.map((card) => (
+          {posts.map((card) => (
             <article
               key={card.skill_id}
               className="prf-post-card"
               onClick={() => navigate(`/feed/viewpost/${card.skill_id}?isHome=false`)}
             >
               <div className="prf-post-card-media">
-                <div
-                  id={`carousel-${card.skill_id}`}
-                  className="carousel slide"
-                  data-bs-ride="false"
-                >
+                <div id={`carousel-${card.skill_id}`} className="carousel slide" data-bs-ride="false">
                   <div className="carousel-inner">
                     {card.media.map((item, index) => (
-                      <div
-                        key={item.media_id}
-                        className={`carousel-item ${index === 0 ? 'active' : ''}`}
-                      >
-                        {item.media_type === 'image' ? (
-                          <img src={item.media_url} alt="" />
-                        ) : (
-                          <video src={item.media_url} />
-                        )}
+                      <div key={item.media_id} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
+                        {item.media_type === 'image'
+                          ? <img src={item.media_url} alt="" />
+                          : <video src={item.media_url} />
+                        }
                       </div>
                     ))}
                   </div>

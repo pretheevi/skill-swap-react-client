@@ -1,11 +1,46 @@
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { useContext, useEffect, useState } from "react";
-import API from '../api/api.js';
+import { useContext, useEffect, useMemo, useReducer } from "react";
 import { toast } from 'react-toastify';
 import { AuthContext } from "../../context/AuthContext";
+import API from '../api/api.js';
 import './followUnfollow.css';
+
+const initialState = {
+  follow: [],
+  search: "",
+  loading: true,
+  followInProgress: false,
+};
+
+const followReducer = (state, action) => {
+  switch (action.type) {
+    case "SET_FOLLOW":
+      return { ...state, follow: action.payload, loading: false };
+
+    case "SET_LOADING":
+      return { ...state, loading: action.payload };
+
+    case "SET_SEARCH":
+      return { ...state, search: action.payload };
+
+    case "SET_FOLLOW_PROGRESS":
+      return { ...state, followInProgress: action.payload };
+
+    case "UPDATE_FOLLOW":
+      return {
+        ...state,
+        followInProgress: false,
+        follow: state.follow.map(f =>
+          f.id === action.payload ? { ...f, is_following: 1 } : f
+        ),
+      };
+
+    default:
+      return state;
+  }
+};
 
 function FollowUnfollow() {
   const navigate = useNavigate();
@@ -13,51 +48,40 @@ function FollowUnfollow() {
   const [searchParams] = useSearchParams();
   const tab = searchParams.get("tab");
 
-  const { user, setUser } = useContext(AuthContext);
-  const loggedUser = user;
-  const [follow, setFollow] = useState([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const { setUser } = useContext(AuthContext); // ✅ removed unused `user` / `loggedUser`
+  const [state, dispatch] = useReducer(followReducer, initialState);
+  const { follow, search, loading, followInProgress } = state;
 
   const fetchFollowData = async () => {
+    dispatch({ type: "SET_LOADING", payload: true });
     try {
-      setLoading(true);
       const response = await API.get(`/profile/${tab}/byId/${user_id}`);
-      console.log(response.data);
-      setFollow(response.data);
+      dispatch({ type: "SET_FOLLOW", payload: response.data });
     } catch (error) {
       console.log(error);
-    } finally {
-      setLoading(false);
+      dispatch({ type: "SET_LOADING", payload: false });
     }
   };
 
-  const [followInProgress, setFollowInProgress] = useState(false);
-  const onFollow = async (is_following, user_id) => {
-    if (followInProgress) return;
-    if (is_following) return;
+  const onFollow = async (is_following, userId) => {
+    if (followInProgress || is_following) return;
+    dispatch({ type: "SET_FOLLOW_PROGRESS", payload: true });
     try {
-      setFollowInProgress(true);
-      const response = await API.post(`/follow/${user_id}`);
-      setFollow(prev =>
-        prev.map(f => f.id === user_id ? { ...f, is_following: 1 } : f)
-      );
-      setUser(prev => ({...prev, following_count: prev.following_count+1 }));
-      setFollowInProgress(false);
+      await API.post(`/follow/${userId}`);
+      dispatch({ type: "UPDATE_FOLLOW", payload: userId });
+      setUser(prev => ({ ...prev, following_count: prev.following_count + 1 }));
     } catch (error) {
       toast.error(error.response.data.message);
-      console.log(error.response);
-      setFollowInProgress(false);
+      dispatch({ type: "SET_FOLLOW_PROGRESS", payload: false });
     }
   };
 
-  useEffect(() => {
-    fetchFollowData();
-  }, [user_id, tab]);
+  // useMemo — only re-filters when follow list or search changes
+  const filtered = useMemo(() =>
+    follow.filter(f => f.name?.toLowerCase().includes(search.toLowerCase()))
+  , [follow, search]);
 
-  const filtered = follow.filter(f =>
-    f.name?.toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => { fetchFollowData(); }, [user_id, tab]);
 
   return (
     <div className="row flw-wrapper">
@@ -73,7 +97,6 @@ function FollowUnfollow() {
           </button>
         </div>
 
-        {/* tabs */}
         <div className="flw-tabs">
           <button
             className={`flw-tab ${tab === "followers" ? "active" : ""}`}
@@ -98,7 +121,7 @@ function FollowUnfollow() {
           type="text"
           placeholder="Search"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => dispatch({ type: "SET_SEARCH", payload: e.target.value })}
         />
       </div>
 
@@ -133,7 +156,17 @@ function FollowUnfollow() {
                   <p className="flw-name">{f.name}</p>
                   <p className="flw-handle">@{f.name}</p>
                 </div>
-                <button className={`flw-action-btn ${f.is_following ? "message" : "follow"}`} onClick={() => onFollow(f.is_following, f.id)}>
+                <button
+                  className={`flw-action-btn ${f.is_following ? "message" : "follow"}`}
+                  onClick={() => {
+                    if (f.is_following) {
+                      navigate(`/feed/chat?from=message&userId=${f.id}&name=${encodeURIComponent(f.name)}&avatar=${encodeURIComponent(f.avatar)}`)
+                    } else {
+                      onFollow(f.is_following, f.id)
+                    }
+                    }}
+                  disabled={followInProgress} //  prevents spam clicks
+                >
                   {f.is_following ? "Message" : "Follow"}
                 </button>
               </li>

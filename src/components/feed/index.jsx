@@ -19,7 +19,6 @@ const RATIO_TO_SPAN = {
 };
 
 function timeAgo(dateStr) {
-  if (!dateStr) return '';
   const date = new Date(dateStr.replace(' ', 'T'));
   const diff = Math.floor((Date.now() - date.getTime()) / 1000);
 
@@ -33,10 +32,10 @@ function timeAgo(dateStr) {
 
 function Feed() {
   const navigate = useNavigate();
-  const { feed, setFeed } = useContext(FeedContext);  // ← feed comes from context
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [heartBeatId, setHeartBeatId] = useState(null);
+
+  const { state, dispatch } = useContext(FeedContext);  
+  const { feed, loading, hasMore, heartBeatId } = state;
+
   const loadingRef = useRef(false);
   const feedRef = useRef(null);
   const pageRef = useRef(1);
@@ -44,26 +43,24 @@ function Feed() {
   const fetchFeed = async (pageNum = 1) => {
     if (loadingRef.current) return;
     loadingRef.current = true;
-    setLoading(true);
+    dispatch({ type: "SET_LOADING", payload: true })
+  
     try {
       const response = await API.get(`/skills?page=${pageNum}&limit=10`);
       const newData = response.data;
       if (pageNum === 1) {
-        setFeed(newData);
+        dispatch({ type: "SET_FEED", payload: newData })
       } else {
-        setFeed(prev => {
-          const existingIds = new Set(prev.map(s => s.skill_id));
-          const unique = newData.filter(s => !existingIds.has(s.skill_id));
-          console.log('feed next unique', unique)
-          return [...prev, ...unique];
-        });
+        dispatch({ type: "APPEND_FEED", payload: newData })
       }
-      setHasMore(newData.length === 10);
+
+      dispatch({ type: "SET_HAS_MORE", payload: newData.length === 10 });
+
     } catch (error) {
       console.log(error);
     } finally {
       loadingRef.current = false;
-      setLoading(false);
+      dispatch({ type: "SET_LOADING", payload: false });
     }
   };
 
@@ -94,16 +91,12 @@ function Feed() {
     try {
       const response = await API.post(`/${skill_id}/like/toggle`);
       const { likeCount, liked } = response.data.data;
-      setFeed(feed =>
-        feed.map(skill =>
-          skill.skill_id === skill_id
-            ? { ...skill, like_count: likeCount, user_liked: liked }
-            : skill
-        )
-      );
+
+      dispatch({ type: "TOGGLE_LIKE", payload: { skill_id, likeCount, liked } });
+
       if (liked) {
-        setHeartBeatId(skill_id);
-        setTimeout(() => setHeartBeatId(null), 400);
+        dispatch({ type: "SET_HEARTBEAT", payload: skill_id });
+        setTimeout(() => dispatch({ type: "SET_HEARTBEAT", payload: null }), 400);
       }
     } catch (error) {
       console.log(error);
@@ -131,7 +124,7 @@ function Feed() {
             />
             <div className="card-header-info">
               <h6 className="card-username">{card.user_name}</h6>
-              <span className="card-time">{timeAgo(card.updated_at)}</span>
+              <span className="card-time">{timeAgo(card.skill_updated_at)}</span>
             </div>
             <FontAwesomeIcon icon={faEllipsis} className="card-more-icon" />
           </header>
