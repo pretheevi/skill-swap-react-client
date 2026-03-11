@@ -338,16 +338,21 @@
   border-top: 1px solid rgba(0,0,0,0.06);
   flex-shrink: 0;
   background: var(--bg-surface, #fff);
+  width: 100%;
+  box-sizing: border-box; /* ✅ padding included in width */
 }
 
 .ch-input-wrap {
   flex: 1;
+  min-width: 0; /* ✅ prevents flex child from overflowing parent */
   display: flex;
   align-items: center;
   gap: 4px;
   background: var(--bg-surface-alt, #f5f5f5);
   border-radius: 24px;
   padding: 8px 12px 8px 16px;
+  box-sizing: border-box; /* ✅ padding included in width */
+  overflow: hidden;
 }
 
 .ch-input {
@@ -370,9 +375,11 @@
   font-size: 16px;
 }
 
+
 .ch-send-btn {
   width: 40px;
   height: 40px;
+  flex-shrink: 0; /* ✅ send button never shrinks or gets pushed out */
   border: none;
   border-radius: 50%;
   background: var(--color-purple-500, #6d4af8);
@@ -382,7 +389,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   transition: background 0.15s, transform 0.15s;
 }
 
