@@ -13,6 +13,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import API from '../api/api';
 import { AuthContext } from '../../context/AuthContext';
+import { WSContext } from '../../context/WSContext';
 import './chat.css';
 
 const initialState = {
@@ -22,6 +23,7 @@ const initialState = {
   search: '',
   messages: [],
   message: '',
+  isTyping: false
 };
 
 const chatReducer = (state, action) => {
@@ -59,6 +61,9 @@ const chatReducer = (state, action) => {
     case "SET_MESSAGE_INPUT":
       return { ...state, message: action.payload };
 
+    case "SET_TYPING":
+      return { ...state, isTyping: action.payload }
+
     case "SET_SEARCH":
       return { ...state, search: action.payload };
 
@@ -80,11 +85,11 @@ function Chat() {
   const loggedUserId = useContext(AuthContext).user?.id;
   const [state, dispatch] = useReducer(chatReducer, initialState);
   const { roomList, selectedRoomId, showList, search, messages, message } = state;
-  const wsRef = useRef(null);
+  const { ws, wsRef, onlineUsers } = useContext(WSContext);
   const messagesEndRef = useRef(null);
-   
-
-  const selected = useMemo(() =>
+  const typingTimeoutRef = useRef(null); 
+  const selectedRoomRef = useRef(null);
+  const selectedRoom = useMemo(() =>
     roomList.find(c => c.room_id === selectedRoomId) ||
     (selectedRoomId ? {
       room_id: selectedRoomId,
@@ -104,6 +109,7 @@ function Chat() {
     try{
       const response = await API.get('/chat/rooms');
       dispatch({ type: "SET_ROOMS", payload: response.data.rooms });
+      console.log(response)
     } catch(error) {
       console.log(error);
     }
@@ -128,33 +134,18 @@ function Chat() {
     }
   }
 
-  const handleNewMessaageInput = (e) => {
-    dispatch({ type: "SET_MESSAGE_INPUT", payload: e.target.value });
-  }
-
-  const onSendNewMessage = async () => {
-    if (!message.trim()) return;
-    const tempMsg = {
-      id: Date.now(),
-      sender_id: loggedUserId,
-      text: message.trim(),
-      created_at: new Date().toISOString(),
-    };
-    dispatch({ type: "ADD_MESSAGE", payload: tempMsg });
-    dispatch({ type: "SET_MESSAGE_INPUT", payload: '' });
-    wsRef.current?.send(JSON.stringify({
-      receiver_id: selected.other_user_id || selected.id,
-      text: tempMsg.text,
-    }));
-  };
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   useEffect(() => {
+    dispatch({ type: "SET_TYPING", payload: false })
     if (selectedRoomId) fetchRoomConversations(selectedRoomId);
   }, [selectedRoomId]);
+
+  useEffect(() => {
+    selectedRoomRef.current = selectedRoom;
+  }, [selectedRoom]);
 
   useEffect(() => {
     if (!fromMessage || !targetUserId) return;
@@ -170,42 +161,60 @@ function Chat() {
   }, [fromMessage, targetUserId, roomList]);
 
 
+  const handleNewMessaageInput = (e) => {
+    dispatch({ type: "SET_MESSAGE_INPUT", payload: e.target.value });
+
+    console.log('receiver_id:', selectedRoom?.other_user_id); // ← and this
+    console.log('ws readyState:', wsRef?.current?.readyState);
+    wsRef?.current?.send(JSON.stringify({
+      type: 'typing',
+      receiver_id: selectedRoom.other_user_id,
+    }))
+  }
+
+  const onSendNewMessage = async () => {
+    if (!message.trim()) return;
+    const tempMsg = {
+      id: Date.now(),
+      sender_id: loggedUserId,
+      text: message.trim(),
+      created_at: new Date().toISOString(),
+    };
+    dispatch({ type: "ADD_MESSAGE", payload: tempMsg });
+    dispatch({ type: "SET_MESSAGE_INPUT", payload: '' });
+    wsRef.current?.send(JSON.stringify({
+      receiver_id: selectedRoom.other_user_id || selectedRoom.id,
+      text: tempMsg.text,
+    }));
+  };
+
   useEffect(() => {
     fetchAllRooms();
-
-    const token = localStorage.getItem('token');
-    const wsUrl = [
-      `wss://insta-mirror-server.onrender.com?token=${token}`,
-      `ws://localhost:8080?token=${token}`
-    ]
-    const ws = new WebSocket(wsUrl[0]);
-    wsRef.current = ws;
-
-      // ping every 30 seconds to keep alive
-      const ping = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: 'ping' }));
-        }
-      }, 30000);
-
-    ws.onmessage = (e) => {
+    if (!ws) return;
+    
+    const handleMessage = (e) => {
       const data = JSON.parse(e.data);
+
       if (data.type === 'message') {
-        // received from other person
         dispatch({ type: "ADD_MESSAGE", payload: data.message });
         dispatch({ type: "UPDATE_ROOM_LAST_MESSAGE", payload: data.message });
       }
       if (data.type === 'sent') {
-        // replace temp message with real one from DB
         dispatch({ type: "REPLACE_TEMP_MESSAGE", payload: data.message });
+      }
+      if (data.type === 'typing') {
+        if (String(data.sender_id) !== String(selectedRoomRef.current?.other_user_id)) return;
+        dispatch({ type: "SET_TYPING", payload: true });
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = setTimeout(() => {
+          dispatch({ type: "SET_TYPING", payload: false });
+        }, 2000);
       }
     };
 
-    return () => {
-    clearInterval(ping);
-    ws.close();
-  };
-  }, []);
+    ws.addEventListener('message', handleMessage);
+    return () => ws.removeEventListener('message', handleMessage);
+  }, [ws]);
 
   return (
     <div className="chat-root">
@@ -239,12 +248,14 @@ function Chat() {
             >
               <div className="clt-avatar-wrap">
                 <img src={chat.other_user_avatar || '/avatar.jpg'} alt={chat.other_user_name} className="clt-avatar" />
-                {/* {chat && <span className="clt-unread-dot" />} */}
+                <span 
+                  className={`clt-presence-dot ${
+                      onlineUsers.has(String(chat.other_user_id)) ? 'online' : 'offline'
+                  }`} />
               </div>
               <div className="clt-info">
                 <div className="clt-row">
                   <span className="clt-name">{chat.other_user_name}</span>
-                  {/* <span className="clt-time">{chat.lastActive}</span> */}
                 </div>
                 <p className="clt-preview">{chat.last_message}</p>
               </div>
@@ -257,7 +268,7 @@ function Chat() {
       <div className={`chat-window ${!showList ? 'mobile-show' : 'mobile-hide'}`}>
 
         {/* no room selected — blank state on desktop */}
-        {!selected ? (
+        {!selectedRoom ? (
           <div className="ch-no-selection">
             <p>Select a conversation or message someone</p>
           </div>
@@ -268,14 +279,19 @@ function Chat() {
               <button className="ch-back-btn d-lg-none" onClick={handleRoomBack}>
                 <FontAwesomeIcon icon={faChevronLeft} />
               </button>
-              <img src={selected?.other_user_avatar || '/avatar.jpg'} alt={selected?.other_user_name} className="ch-avatar"
-                onClick={() => navigate(`/feed/profile/${selected.other_user_id}`)}
+              <img src={selectedRoom?.other_user_avatar || '/avatar.jpg'} alt={selectedRoom?.other_user_name} className="ch-avatar"
+                onClick={() => navigate(`/feed/profile/${selectedRoom.other_user_id}`)}
                 onError={e => { e.target.src = '/avatar.jpg'; }} />
               <div className="ch-header-info">
-                <span className="ch-name">{selected?.other_user_name}</span>
+                <span className="ch-name">{selectedRoom?.other_user_name}</span>
                 <span className="ch-status">
                   <span className="ch-status-dot" />
-                  Active now
+                     {state.isTyping
+                        ? 'typing...'
+                        : onlineUsers.has(String(selectedRoom?.other_user_id))
+                          ? 'Active now'
+                          : 'Offline'
+                      }
                 </span>
               </div>
               <div className="ch-header-actions">
@@ -289,9 +305,9 @@ function Chat() {
             <div className="ch-messages">
               {messages.length === 0 ? (
                 <div className="ch-empty-state">
-                  <img src={selected?.other_user_avatar || '/avatar.jpg'} alt=""
+                  <img src={selectedRoom?.other_user_avatar || '/avatar.jpg'} alt=""
                     className="ch-empty-avatar" onError={e => { e.target.src = '/avatar.jpg'; }} />
-                  <p className="ch-empty-name">{selected?.other_user_name}</p>
+                  <p className="ch-empty-name">{selectedRoom?.other_user_name}</p>
                   <p className="ch-empty-hint">Start the conversation</p>
                 </div>
               ) : (
