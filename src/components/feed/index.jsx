@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef, useEffect } from 'react';
+import React, { useContext, useRef, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -11,6 +11,7 @@ import {
 import { faHeart, faComment as faCommentReg, faBookmark } from '@fortawesome/free-regular-svg-icons';
 import { FeedContext } from '../../context/FeedContext';
 import API from '../api/api';
+import { toast } from 'react-toastify';
 import './feed.css';
 
 const RATIO_TO_SPAN = {
@@ -85,21 +86,40 @@ function Feed() {
     return () => el.removeEventListener('scroll', handleScroll);
   }, []); // empty deps — no stale closure since we use refs
 
-
-
   const handleSkillLike = async (skill_id) => {
+    const currentSkill = state.feed.find(s => s.skill_id == skill_id);
+    const previousLiked = currentSkill.user_liked;
+    const previousLikedCount = currentSkill.like_count;
+
+    dispatch({
+      type: "TOGGLE_LIKE",
+      payload: {
+        skill_id,
+        liked: !previousLiked,
+        likeCount: previousLiked ? previousLikedCount - 1 : previousLikedCount + 1,
+      },
+    });
+
+    if (!previousLiked) {
+      dispatch({ type: "SET_HEARTBEAT", payload: skill_id });
+      setTimeout(() => dispatch({ type: "SET_HEARTBEAT", payload: null }), 400);
+    }
+
     try {
       const response = await API.post(`/${skill_id}/like/toggle`);
       const { likeCount, liked } = response.data.data;
 
       dispatch({ type: "TOGGLE_LIKE", payload: { skill_id, likeCount, liked } });
-
-      if (liked) {
-        dispatch({ type: "SET_HEARTBEAT", payload: skill_id });
-        setTimeout(() => dispatch({ type: "SET_HEARTBEAT", payload: null }), 400);
-      }
     } catch (error) {
-      console.log(error);
+      dispatch({
+        type: "TOGGLE_LIKE",
+        payload: {
+          skill_id,
+          liked: previousLiked,
+          likeCount: previousLikedCount,
+        },
+      });
+      toast.warning(error.response.data.message)
     }
   };
 

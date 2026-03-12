@@ -121,6 +121,7 @@ function Chat() {
   const fetchRoomConversations = async (roomId) => {
     try {
       const response = await API.get(`/chat/room/conversation/${roomId}`);
+      console.log('fetchRoomConversation', response.data);
       dispatch({ type: "SET_MESSAGES", payload: response.data.roomConversation });
     } catch(error) {
       console.log(error);
@@ -156,11 +157,17 @@ function Chat() {
   }, [selectedRoomId]);
 
   useEffect(() => {
-    if (fromMessage && targetUserId) {
-      const existing = roomList.find(c => String(c.id) === targetUserId);
-      dispatch({ type: "SELECT_ROOM", payload: existing ? existing.id : targetUserId });
+    if (!fromMessage || !targetUserId) return;
+    if (roomList.length === 0) return;
+
+    const existing = roomList.find(c => String(c.other_user_id) === String(targetUserId));
+    
+    if (existing) {
+      dispatch({ type: "SELECT_ROOM", payload: existing.room_id });
+    } else {
+      dispatch({ type: "SELECT_ROOM", payload: targetUserId });
     }
-  }, [fromMessage, targetUserId]);
+  }, [fromMessage, targetUserId, roomList]);
 
 
   useEffect(() => {
