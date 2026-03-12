@@ -27,6 +27,7 @@ import Profile from './components/profile/profile';
 import FollowUnfollow from './components/followUnfollow';
 import Viewpost from './components/viewpost/viewpost';
 import EditSkill from './components/editSkill/editSkill';
+import Settings from './components/settings/settings';
 
 
 // ── guards ────────────────────────────────────────────────
@@ -45,7 +46,6 @@ function PublicRoute({ children, isAuthenticated }) {
 // ── app ───────────────────────────────────────────────────
 function App() {
   const navigate = useNavigate();
-
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [verifying, setVerifying] = useState(true);
   const [user, setUser] = useState(null);
@@ -160,7 +160,7 @@ function App() {
                             <FontAwesomeIcon icon={faSearch} />
                             <p>Explore</p>
                           </div>
-                          <div className="dash-navbar-item">
+                          <div className="dash-navbar-item" onClick={() => navigate('/feed/settings')}>
                             <FontAwesomeIcon icon={faGear} />
                             <p>Settings</p>
                           </div>
@@ -209,6 +209,11 @@ function App() {
                             <Route path="/feed/editSkill/:skill_id" element={
                               <div className="container-fluid main-editSkill-container">
                                 <EditSkill />
+                              </div>
+                            } />
+                            <Route path="/feed/settings" element={
+                              <div className='container-fluid main-settings-container'>
+                                <Settings />
                               </div>
                             } />
                           </Route>

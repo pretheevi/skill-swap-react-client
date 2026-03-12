@@ -10,15 +10,15 @@
   width: 100%;
   height: 100%;
   margin: 0 auto;
-  background: #fff;
+  background: var(--bg-surface);
 }
 
 /* ── header ── */
 .flw-header {
   flex-shrink: 0;
   padding: 16px 16px 0;
-  background: #fff;
-  border-bottom: 1px solid #efefef;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
 }
 
 .flw-top-row {
@@ -31,7 +31,7 @@
 .flw-username {
   font-size: 16px;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -39,7 +39,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #111;
+  color: var(--text-primary);
   font-size: 18px;
   padding: 4px;
   display: flex;
@@ -48,11 +48,11 @@
   border-radius: 50%;
   width: 32px;
   height: 32px;
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .flw-close-btn:hover {
-  background: #f0f0f0;
+  background: var(--bg-hover);
 }
 
 /* ── tabs ── */
@@ -69,15 +69,15 @@
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: #999;
+  color: var(--text-muted);
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: color 0.2s, border-color 0.2s;
+  transition: color var(--transition-base), border-color var(--transition-base);
 }
 
 .flw-tab.active {
-  color: #111;
-  border-bottom: 2px solid #111;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--accent-primary);
 }
 
 /* ── search ── */
@@ -85,14 +85,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #f5f5f5;
-  border-radius: 10px;
+  background: var(--bg-surface-alt);
+  border-radius: var(--radius-sm);
   padding: 8px 12px;
   margin: 12px 16px;
 }
 
 .flw-search-wrap svg {
-  color: #999;
+  color: var(--text-muted);
   font-size: 13px;
   flex-shrink: 0;
 }
@@ -103,12 +103,12 @@
   outline: none;
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
-  color: #111;
+  color: var(--text-primary);
   width: 100%;
 }
 
 .flw-search-input::placeholder {
-  color: #bbb;
+  color: var(--text-muted);
 }
 
 /* ── body ── */
@@ -134,11 +134,11 @@
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 }
 
 .flw-item:hover {
-  background: #fafafa;
+  background: var(--bg-hover);
 }
 
 .flw-avatar {
@@ -147,7 +147,8 @@
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  background: #f0f0f0;
+  background: var(--bg-surface-alt);
+  border: 2px solid var(--border);
 }
 
 .flw-info {
@@ -159,7 +160,7 @@
 .flw-name {
   font-size: 14px;
   font-weight: 600;
-  color: #111;
+  color: var(--text-primary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -168,35 +169,41 @@
 
 .flw-handle {
   font-size: 13px;
-  color: #999;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .flw-action-btn {
   flex-shrink: 0;
   padding: 6px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-family: 'DM Sans', sans-serif;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
   border: none;
 }
 
 .flw-action-btn:hover {
-  opacity: 0.8;
+  opacity: 0.85;
+  transform: scale(1.02);
 }
 
 .flw-action-btn.follow {
-  background: #111;
-  color: #fff;
+  background: var(--accent-primary);
+  color: var(--text-on-purple);
 }
 
 .flw-action-btn.message {
-  background: #f0f0f0;
-  color: #111;
-  border: 1px solid #dbdbdb;
+  background: var(--bg-surface-alt);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.flw-action-btn.message:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 /* ── empty state ── */
@@ -206,7 +213,7 @@
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  color: #999;
+  color: var(--text-muted);
   gap: 8px;
 }
 
@@ -215,7 +222,7 @@
   margin: 0;
 }
 
-/* ── skeleton ── */
+/* ── skeleton loading ── */
 .flw-skeleton {
   display: flex;
   align-items: center;
@@ -227,7 +234,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #f0f0f0;
+  background: var(--bg-surface-alt);
   animation: shimmer 1.2s infinite;
 }
 
@@ -240,8 +247,8 @@
 
 .sk-line {
   height: 12px;
-  border-radius: 6px;
-  background: #f0f0f0;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-alt);
   animation: shimmer 1.2s infinite;
 }
 

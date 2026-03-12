@@ -108,11 +108,7 @@ function Profile() {
               <h1 className="prf-info-account-name">{profileUser?.name || '—'}</h1>
               {isOwnProfile && (
                 <div className="prf-info-icons d-lg-none">
-                  <FontAwesomeIcon icon={faGear} />
-                  <FontAwesomeIcon
-                    icon={faDoorOpen}
-                    onClick={() => { localStorage.removeItem('token'); window.location.reload(); }}
-                  />
+                  <FontAwesomeIcon icon={faGear} onClick={() => navigate("/feed/settings")} />
                 </div>
               )}
             </div>
