@@ -23,9 +23,14 @@ const initialState = {
   search: '',
   messages: [],
   message: '',
-  isTyping: false
+  isTyping: false,
+  // Pagination states
+  hasMoreMessages: true,
+  messageOffset: 0,
+  loadingMore: false,
+  messageLimit: 30,
+  totalMessages: 0
 };
-
 const chatReducer = (state, action) => {
   switch (action.type) {
     case "SET_ROOMS":
@@ -43,8 +48,11 @@ const chatReducer = (state, action) => {
     case "REPLACE_TEMP_MESSAGE":
       return {
         ...state,
-        messages: state.messages.map(m =>
-          typeof m.id === 'number' ? action.payload : m
+        messages: state.messages.map(m => 
+          // Match by tempId if it exists, or fall back to other methods
+          (m.tempId && m.tempId === action.payload.tempId) 
+            ? { ...action.payload, tempId: undefined } // Remove tempId after replacement
+            : m
         )
       };
 
@@ -70,6 +78,36 @@ const chatReducer = (state, action) => {
     case "HANDLE_BACK":
       return { ...state, showList: true, selectedRoomId: null };
 
+
+    case "SET_MESSAGES_WITH_PAGINATION":
+      return {
+        ...state,
+        messages: action.payload.messages,
+        hasMoreMessages: action.payload.hasMore,
+        messageOffset: action.payload.offset + action.payload.messages.length,
+        totalMessages: action.payload.total
+      };
+      
+    case "APPEND_OLDER_MESSAGES":
+      return {
+        ...state,
+        messages: [...action.payload.messages, ...state.messages],
+        hasMoreMessages: action.payload.hasMore,
+        messageOffset: action.payload.newOffset,
+        loadingMore: false
+      };
+      
+    case "SET_LOADING_MORE":
+      return { ...state, loadingMore: action.payload };
+      
+    case "RESET_PAGINATION":
+      return {
+        ...state,
+        hasMoreMessages: true,
+        messageOffset: 0,
+        loadingMore: false
+      };
+      
     default:
       return state;
   }
@@ -98,6 +136,9 @@ function Chat() {
       other_user_id: targetUserId
     } : null)
   , [roomList, selectedRoomId, targetName, targetAvatar, targetUserId]);
+  const messagesContainerRef = useRef(null);
+  const observerRef = useRef(null);
+  const loadMoreTriggerRef = useRef(null);
     
   const filtered =  useMemo(() => 
     roomList.filter(c =>
@@ -117,6 +158,7 @@ function Chat() {
 
   const onRoomSelect = (roomId) => {
     dispatch({ type: "SELECT_ROOM", payload: roomId });
+    navigate(`/feed/chat?room=${roomId}`, { replace: true });
   };
 
   const handleRoomBack = () => {
@@ -124,24 +166,118 @@ function Chat() {
     navigate('/feed/chat', { replace: true });
   };
 
-  const fetchRoomConversations = async (roomId) => {
-    try {
-      const response = await API.get(`/chat/room/conversation/${roomId}`);
-      console.log('fetchRoomConversation', response.data);
-      dispatch({ type: "SET_MESSAGES", payload: response.data.roomConversation });
-    } catch(error) {
-      console.log(error);
+    // Add this useEffect to set up the intersection observer
+  useEffect(() => {
+    if (!selectedRoomId || !state.hasMoreMessages || state.loadingMore) return;
+
+    // Clean up previous observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
     }
-  }
+
+    // Create new observer
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && state.hasMoreMessages && !state.loadingMore) {
+          console.log('📜 Load more triggered by scroll');
+          fetchRoomConversations(selectedRoomId, true);
+        }
+      },
+      {
+        root: messagesContainerRef.current,
+        threshold: 0.1, // Trigger when 10% visible
+        rootMargin: '20px 0px 0px 0px' // Slightly提前 trigger
+      }
+    );
+
+    // Observe the trigger element
+    if (loadMoreTriggerRef.current) {
+      observerRef.current.observe(loadMoreTriggerRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [selectedRoomId, state.hasMoreMessages, state.loadingMore, messagesContainerRef.current]);
+
+ // Update fetchRoomConversations to handle scroll loading
+  const fetchRoomConversations = async (roomId, loadMore = false) => {
+    try {
+      if (loadMore) {
+        dispatch({ type: "SET_LOADING_MORE", payload: true });
+      }
+      
+      const limit = state.messageLimit;
+      const offset = loadMore ? state.messageOffset : 0;
+      
+      const response = await API.get(
+        `/chat/room/conversation/${roomId}?limit=${limit}&offset=${offset}`
+      );
+      
+      console.log('📥 Fetched conversations:', response.data);
+      
+      if (loadMore) {
+        // Store scroll height before updating messages
+        const container = messagesContainerRef.current;
+        const oldScrollHeight = container?.scrollHeight || 0;
+        const oldScrollTop = container?.scrollTop || 0;
+        
+        // Prepend older messages
+        dispatch({ 
+          type: "APPEND_OLDER_MESSAGES", 
+          payload: {
+            messages: response.data.roomConversation,
+            hasMore: response.data.pagination.hasMore,
+            // Use the new offset from server response instead of calculating
+            newOffset: offset + response.data.roomConversation.length
+          }
+        });
+        
+        // Restore scroll position after messages are rendered
+        setTimeout(() => {
+          if (container) {
+            const newScrollHeight = container.scrollHeight;
+            // Adjust scroll to maintain position relative to new content
+            container.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
+          }
+        }, 100);
+      } else {
+        dispatch({ 
+          type: "SET_MESSAGES_WITH_PAGINATION", 
+          payload: {
+            messages: response.data.roomConversation,
+            hasMore: response.data.pagination.hasMore,
+            offset: 0,
+            total: response.data.pagination.total
+          }
+        });
+      }
+      
+    } catch(error) {
+      console.error('Error fetching conversations:', error);
+    } finally {
+      if (loadMore) {
+        dispatch({ type: "SET_LOADING_MORE", payload: false });
+      }
+    }
+  };
+
+  // Update the useEffect that fetches on room change
+  useEffect(() => {
+    dispatch({ type: "SET_TYPING", payload: false });
+    dispatch({ type: "RESET_PAGINATION" }); // Reset pagination when room changes
+    
+    if (selectedRoomId) {
+      fetchRoomConversations(selectedRoomId, false); // false = not loading more
+    }
+  }, [selectedRoomId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  useEffect(() => {
-    dispatch({ type: "SET_TYPING", payload: false })
-    if (selectedRoomId) fetchRoomConversations(selectedRoomId);
-  }, [selectedRoomId]);
 
   useEffect(() => {
     selectedRoomRef.current = selectedRoom;
@@ -175,7 +311,8 @@ function Chat() {
   const onSendNewMessage = async () => {
     if (!message.trim()) return;
     const tempMsg = {
-      id: Date.now(),
+      id: `temp-${Date.now()}`, // Use string temp ID
+      tempId: `temp-${Date.now()}`, // Store it separately
       sender_id: loggedUserId,
       text: message.trim(),
       created_at: new Date().toISOString(),
@@ -189,19 +326,52 @@ function Chat() {
   };
 
   useEffect(() => {
+    const roomFromUrl = searchParams.get('room');
+
+    const initializeChat = async () => {
+      await fetchAllRooms();
+      
+      // If there's a room ID in URL, select it after rooms load
+      if (roomFromUrl) {
+        dispatch({ type: "SELECT_ROOM", payload: roomFromUrl });
+      }
+    };
+
     fetchAllRooms();
     if (!ws) return;
     
     const handleMessage = (e) => {
       const data = JSON.parse(e.data);
+      console.log('📨 WS received:', data); // Add this to debug
 
       if (data.type === 'message') {
+        // This is when someone else sends YOU a message
+        console.log('📩 New message from someone:', data.message);
         dispatch({ type: "ADD_MESSAGE", payload: data.message });
-        dispatch({ type: "UPDATE_ROOM_LAST_MESSAGE", payload: data.message });
+        dispatch({ 
+          type: "UPDATE_ROOM_LAST_MESSAGE", 
+          payload: { 
+            room_id: data.message.room_id, 
+            text: data.message.text 
+          } 
+        });
       }
+      
       if (data.type === 'sent') {
+        // This is confirmation that YOUR message was saved
+        console.log('✅ Message sent confirmation:', data.message);
         dispatch({ type: "REPLACE_TEMP_MESSAGE", payload: data.message });
+        
+        // Update the room list with the new last message
+        dispatch({ 
+          type: "UPDATE_ROOM_LAST_MESSAGE", 
+          payload: { 
+            room_id: data.message.room_id, 
+            text: data.message.text 
+          } 
+        });
       }
+      
       if (data.type === 'typing') {
         if (String(data.sender_id) !== String(selectedRoomRef.current?.other_user_id)) return;
         dispatch({ type: "SET_TYPING", payload: true });
@@ -210,11 +380,16 @@ function Chat() {
           dispatch({ type: "SET_TYPING", payload: false });
         }, 2000);
       }
+      
+      if (data.type === 'online_users') {
+        // Your WSContext already handles this, but you can also handle it here
+        console.log('👥 Online users:', data.userIds);
+      }
     };
-
+    initializeChat();
     ws.addEventListener('message', handleMessage);
     return () => ws.removeEventListener('message', handleMessage);
-  }, [ws]);
+  }, [ws, selectedRoomId]); // Add dependency
 
   return (
     <div className="chat-root">
@@ -302,7 +477,28 @@ function Chat() {
             </header>
 
             {/* messages area */}
-            <div className="ch-messages">
+            <div className="ch-messages" ref={messagesContainerRef}>
+                {/* Scroll trigger for loading more - appears at the top */}
+                {state.hasMoreMessages && messages.length > 0 && (
+                  <div 
+                    ref={loadMoreTriggerRef}
+                    className="ch-scroll-trigger"
+                    style={{ 
+                      height: '20px', 
+                      marginBottom: '10px',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center'
+                    }}
+                  >
+                    {state.loadingMore && (
+                      <div className="ch-loading-indicator">
+                        <span className="ch-spinner"></span>
+                        <span>Loading older messages...</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               {messages.length === 0 ? (
                 <div className="ch-empty-state">
                   <img src={selectedRoom?.other_user_avatar || '/avatar.jpg'} alt=""
@@ -311,16 +507,21 @@ function Chat() {
                   <p className="ch-empty-hint">Start the conversation</p>
                 </div>
               ) : (
-                messages.map(msg => (
-                  <div
-                    key={msg.id}
-                    className={`ch-message ${msg.sender_id === loggedUserId ? 'ch-message-mine' : 'ch-message-theirs'}`}
-                  >
-                    <p className="ch-message-text">{msg.text}</p>
-                    <span className="ch-message-time">{timeAgo(msg.created_at)}</span>
-                  </div>
-                ))
-              )}
+                messages.map(msg => {
+                  // Create a unique key - use real ID if available, otherwise use temp ID or fallback
+                  const msgKey = msg.id || msg.tempId || `msg-${Date.now()}-${Math.random()}`;
+                    
+                    return (
+                      <div
+                        key={msgKey}
+                        className={`ch-message ${msg.sender_id === loggedUserId ? 'ch-message-mine' : 'ch-message-theirs'}`}
+                      >
+                        <p className="ch-message-text">{msg.text}</p>
+                        <span className="ch-message-time">{timeAgo(msg.created_at)}</span>
+                      </div>
+                    );
+                  })
+                )}
               <div ref={messagesEndRef} />
             </div>
 

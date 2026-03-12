@@ -1,0 +1,294 @@
+.main-editProfile-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-surface);
+  z-index: 999;
+}
+
+/* ── wrapper ── */
+.ep-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-surface);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.ep-wrapper::-webkit-scrollbar { display: none; }
+
+/* ── header ── */
+.ep-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  flex-shrink: 0;
+}
+
+.ep-back-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-surface-alt);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.ep-back-btn:active { transform: scale(0.9); }
+
+.ep-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.ep-save-btn {
+  padding: 7px 18px;
+  border-radius: 20px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--bg-surface-alt);
+  color: var(--text-muted, var(--text-secondary));
+  transition: background 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
+  min-width: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+
+.ep-save-btn.active {
+  background: linear-gradient(135deg, var(--color-purple-500, #7a72c1), var(--color-purple-600, #5955b3));
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(89, 85, 179, 0.35);
+}
+
+.ep-save-btn.active:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(89, 85, 179, 0.45);
+}
+
+.ep-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── content ── */
+.ep-content {
+  flex: 1;
+  padding: 28px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  animation: fadeUp 0.4s ease both;
+}
+
+/* ── avatar ── */
+.ep-avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.ep-avatar-wrap {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.ep-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.ep-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--bg-surface-alt);
+  border: 2px dashed var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: var(--text-secondary);
+}
+
+.ep-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 18px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.ep-avatar-wrap:hover .ep-avatar-overlay { opacity: 1; }
+
+/* always show overlay hint on touch */
+.ep-avatar-wrap:active .ep-avatar-overlay { opacity: 1; }
+
+.ep-avatar-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ── form ── */
+.ep-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ep-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ep-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text-secondary);
+}
+
+.ep-label-icon {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.ep-char-count {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted, var(--text-secondary));
+  opacity: 0.6;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.ep-input,
+.ep-textarea {
+  width: 100%;
+  padding: 13px 16px;
+  background: var(--bg-surface-alt);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.ep-input::placeholder,
+.ep-textarea::placeholder {
+  color: var(--text-muted, var(--text-secondary));
+  opacity: 0.5;
+}
+
+.ep-input:focus,
+.ep-textarea:focus {
+  border-color: var(--accent-primary, #5955b3);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 3px rgba(89, 85, 179, 0.1);
+}
+
+.ep-textarea {
+  resize: none;
+  line-height: 1.6;
+}
+
+/* error state */
+.ep-field.error .ep-input,
+.ep-field.error .ep-textarea {
+  border-color: #ff4d4f;
+  box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.1);
+}
+
+.ep-error {
+  font-size: 12px;
+  color: #ff4d4f;
+  margin: 0;
+  padding-left: 4px;
+  animation: fadeUp 0.2s ease both;
+}
+
+/* ── success toast ── */
+.ep-success {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 20px;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #34d399;
+  animation: fadeUp 0.3s ease both;
+}
+
+/* ── animation ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* add to editProfile.css */
+.ep-remove-avatar-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #ff4d4f;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.ep-remove-avatar-btn:hover {
+  background: rgba(255, 77, 79, 0.08);
+}

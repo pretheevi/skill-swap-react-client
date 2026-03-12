@@ -28,6 +28,9 @@ import FollowUnfollow from './components/followUnfollow';
 import Viewpost from './components/viewpost/viewpost';
 import EditSkill from './components/editSkill/editSkill';
 import Settings from './components/settings/settings';
+import AboutUs from './components/aboutUs/aboutUs';
+import TermsAndcondition from './components/termsCondition/termsCondition';
+import EditProfile from './components/editProfile/editProfile';
 
 
 // ── guards ────────────────────────────────────────────────
@@ -214,6 +217,21 @@ function App() {
                             <Route path="/feed/settings" element={
                               <div className='container-fluid main-settings-container'>
                                 <Settings />
+                              </div>
+                            } />
+                            <Route path="/feed/aboutUs" element={
+                              <div className='container-fluid main-aboutUs-container'>
+                                <AboutUs />
+                              </div>
+                            } />
+                            <Route path="/feed/termsConditions" element={
+                              <div className='container-fluid main-termsAndCondition-container'>
+                                <TermsAndcondition />
+                              </div>
+                            } />
+                            <Route path="/feed/editProfile/:id" element={
+                              <div className='container-fluid main-editProfile-container'>
+                                <EditProfile />
                               </div>
                             } />
                           </Route>

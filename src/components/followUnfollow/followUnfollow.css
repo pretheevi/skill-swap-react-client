@@ -11,6 +11,7 @@
   height: 100%;
   margin: 0 auto;
   background: var(--bg-surface);
+  z-index: 999;
 }
 
 /* ── header ── */

@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useContext, useReducer } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -14,6 +14,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import './settings.css';
 import { useTheme } from '../../context/ThemeContext';
+import { AuthContext } from '../../context/AuthContext';
 const initialState = {
   activeSection: null,
   showLogoutConfirm: false,
@@ -72,12 +73,25 @@ const settingsItems = [
 function Settings() {
   const navigate = useNavigate();
   const { theme, dispatch: dispatchTheme } = useTheme();
+  const {user} = useContext(AuthContext)
   const isDark = theme === 'dark';
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleItemClick = (id) => {
     if (id === 'theme') {
-      dispatchTheme({ type: 'TOGGLE' })
+      dispatchTheme({ type: 'TOGGLE' });
+      return;
+    }
+    if (id === 'about') {
+      navigate('/feed/aboutUs');
+      return;
+    }
+    if (id === 'terms') {
+      navigate('/feed/termsConditions');
+      return;
+    }
+    if (id === 'profile') {
+      navigate(`/feed/editProfile/${user.id}`);
       return;
     }
     dispatch({ type: 'SET_SECTION', payload: id });
@@ -180,7 +194,8 @@ function Settings() {
               className="st-modal-confirm"
               onClick={() => {
                 dispatch({ type: 'HIDE_LOGOUT' });
-                navigate('/login');
+                localStorage.removeItem('token')
+                window.location.reload();
               }}
             >
               Log Out

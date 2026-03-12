@@ -54,6 +54,7 @@ function Profile() {
   const getUserProfile = async () => {
     try {
       const response = await API.get(`/profileById/${user_id}`);
+      console.log(response.data)
       if (response.data) dispatch({ type: "SET_PROFILE", payload: response.data });
     } catch (error) {
       console.log('Error fetching user profile:', error);

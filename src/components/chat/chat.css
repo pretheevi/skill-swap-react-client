@@ -530,3 +530,42 @@
     pointer-events: auto !important;
   }
 }
+
+
+/* Add to your chat.css */
+.ch-scroll-trigger {
+  width: 100%;
+  min-height: 30px;
+}
+
+.ch-loading-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg-surface-alt);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.ch-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Smooth scroll behavior */
+.ch-messages {
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
