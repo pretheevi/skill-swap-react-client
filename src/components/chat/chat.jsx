@@ -31,6 +31,8 @@ function Chat() {
   const [ state, dispatch ] = useReducer(chatReducer, initialState);
   const messagesEndRef = useRef(null);
   const loadMoreRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const prevScrollHeightRef = useRef(0);
 
   const onNewMessageInput = (e) => {
     dispatch({type: 'SET_NEW_MESSAGE', payload: e.target.value});
@@ -87,7 +89,12 @@ function Chat() {
   }, []);
 
   const fetchConversation = async (offset=0) => {
-    const limit = 30
+    const limit = 30;
+    
+    if (offset > 0) {
+        prevScrollHeightRef.current = messagesContainerRef.current?.scrollHeight;  // ✅ save before fetch
+    }
+    
     try {
       const response = await API.get(`/chat/room/conversation/${state.selectedRoom.room_id}?limit=${limit}&offset=${offset}`);
       console.log(response);
@@ -114,6 +121,14 @@ function Chat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [state.shouldScrollBottom]);
+
+  useEffect(() => {
+    if (prevScrollHeightRef.current && messagesContainerRef.current) {
+      const newScrollHeight = messagesContainerRef.current.scrollHeight;
+      messagesContainerRef.current.scrollTop = newScrollHeight - prevScrollHeightRef.current;  // ✅ restore
+      prevScrollHeightRef.current = 0;
+    }
+  }, [state.roomConversation]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -229,7 +244,7 @@ function Chat() {
               </div>
             </header>
 
-            <div className="ch-messages">
+            <div className="ch-messages" ref={messagesContainerRef}>
               <div ref={loadMoreRef} />
               {state.roomConversation?.map((msg, i) => (
                 <div key={i} className={`ch-message ${msg.sender_id === loggedUserId ? 'ch-message-mine' : 'ch-message-theirs'}`}>
