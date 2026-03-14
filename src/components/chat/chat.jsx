@@ -49,6 +49,7 @@ function Chat() {
       sender_id: loggedUserId,
       text: newMessage,
       created_at: new Date().toISOString(),
+      scrollDown: true,
     }});
     dispatch({type: 'SET_NEW_MESSAGE', payload: ''});
   }
@@ -112,7 +113,7 @@ function Chat() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [state.roomConversation]);
+  }, [state.shouldScrollBottom]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -136,6 +137,7 @@ function Chat() {
               sender_id: parsed.sender_id,
               text: parsed.text,
               created_at: new Date().toISOString(),
+              scrollDown: false,
             }});
           }
 

@@ -6,6 +6,7 @@ export const initialState = {
   showList: true,
   offset: 0,
   hasMore: true,
+  shouldScrollBottom: false,
 };
 
 
@@ -29,13 +30,13 @@ export const chatReducer = (state, action) => {
       };
 
     case 'SET_ROOM_CONVERSATION':
-      return { ...state, roomConversation: action.payload };
+      return { ...state, roomConversation: action.payload, shouldScrollBottom: true };
 
     case 'APPEND_MESSAGE':
-      return { ...state, roomConversation: [...state.roomConversation, action.payload] };
+      return { ...state, roomConversation: [...state.roomConversation, action.payload], shouldScrollBottom: action.payload.scrollDown };
     
     case 'PREPEND_MESSAGES':
-      return { ...state, roomConversation: [...action.payload, ...state.roomConversation] };
+      return { ...state, roomConversation: [...action.payload, ...state.roomConversation], shouldScrollBottom: false };
 
     case 'SET_OFFSET':
       return { ...state, offset: action.payload };
