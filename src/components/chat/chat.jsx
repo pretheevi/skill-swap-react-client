@@ -293,7 +293,12 @@ function Chat() {
               >
                 <FontAwesomeIcon icon={faChevronLeft} />
               </button>
-              <img src={state.selectedRoom.other_user_avatar || '/avatar.jpg'} alt="John Doe" className="ch-avatar" />
+              <img 
+                src={state.selectedRoom.other_user_avatar || '/avatar.jpg'} 
+                alt="John Doe" 
+                className="ch-avatar"
+                onClick={() => navigate(`/feed/profile/${state.selectedRoom.other_user_id}`)}
+              />
               <div className="ch-header-info">
                 <span className="ch-name">{state.selectedRoom.other_user_name}</span>
                   <span className="ch-status">
