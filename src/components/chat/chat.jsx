@@ -27,15 +27,29 @@ function Chat() {
   const targetUserId   = searchParams.get('userId');
   const targetName     = searchParams.get('name');
   const targetAvatar   = searchParams.get('avatar');
-  const { ws } = useContext(WSContext);
+  const { ws, onlineUsers, registerMessageHandler  } = useContext(WSContext);
   const [ state, dispatch ] = useReducer(chatReducer, initialState);
   const messagesEndRef = useRef(null);
   const loadMoreRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const prevScrollHeightRef = useRef(0);
+  const typingTimeoutRef = useRef(null);
+  const typingClearRef = useRef(null);
 
   const onNewMessageInput = (e) => {
     dispatch({type: 'SET_NEW_MESSAGE', payload: e.target.value});
+    
+    if (typingTimeoutRef.current) return;
+
+    ws.send(JSON.stringify({
+        type: 'typing',
+        room_id: state.selectedRoom?.room_id,
+        receiver_id: state.selectedRoom?.other_user_id,
+    }));
+
+    typingTimeoutRef.current = setTimeout(() => {
+      typingTimeoutRef.current = null;
+    }, 3000);
   }
 
   const onNewMessageSend = (room_id, receiver_id) => {
@@ -54,7 +68,23 @@ function Chat() {
       scrollDown: true,
     }});
     dispatch({type: 'SET_NEW_MESSAGE', payload: ''});
+    clearTimeout(typingTimeoutRef.current);
   }
+
+  const onDeleteMessage = async (msg) => {
+    try {
+      ws.send(JSON.stringify({
+        type: 'delete_message',
+        message_id: msg.id,
+        receiver_id: state.selectedRoom.other_user_id,
+        sender_id: loggedUserId,
+      }));
+
+      await API.delete(`/chat/message/${msg.id}`);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const fetchRooms = async () => {
     try{
@@ -99,9 +129,11 @@ function Chat() {
       const response = await API.get(`/chat/room/conversation/${state.selectedRoom.room_id}?limit=${limit}&offset=${offset}`);
       console.log(response);
       const messages = response.data.roomConversation;
-
+      console.log(messages)
       if (offset === 0) {
         dispatch({ type: 'SET_ROOM_CONVERSATION', payload: messages });
+        await API.patch(`/chat/room/${state.selectedRoom.room_id}/read`);
+      
       } else {
         dispatch({ type: 'PREPEND_MESSAGES', payload: messages });  // older msgs go on top
       }
@@ -142,29 +174,51 @@ function Chat() {
   }, [state.offset, state.hasMore, state.selectedRoom?.room_id]);
 
   useEffect(() => {
-    if (!ws) return;
+    registerMessageHandler((parsed) => {
+        if (parsed.type === 'typing') {
+            dispatch({ type: 'SET_TYPING', payload: parsed.sender_id });
 
-    ws.onmessage = (event) => {
-      const parsed = JSON.parse(event.data);
-      if (parsed.type === 'message') {
+            clearTimeout(typingClearRef.current);
+            typingClearRef.current = setTimeout(() => {
+              dispatch({ type: 'SET_TYPING', payload: null });
+            }, 3000);
+            return;
+        }
+
+        if (parsed.type === 'delete_message') {
+          dispatch({ type: 'DELETE_MESSAGE_BY_ID', payload: parsed.message_id });
+          return;
+        }
+
+        if (parsed.type === 'message') {        
           if (parsed.sender_id !== loggedUserId) {
-            dispatch({ type: 'APPEND_MESSAGE', payload: {
-              sender_id: parsed.sender_id,
-              text: parsed.text,
-              created_at: new Date().toISOString(),
-              scrollDown: false,
-            }});
+              dispatch({ type: 'APPEND_MESSAGE', payload: {
+                sender_id: parsed.sender_id,
+                text: parsed.text,
+                created_at: new Date().toISOString(),
+                scrollDown: false,
+              }});
+            }
+
+          if (state.selectedRoom?.room_id !== parsed.room_id) {
+            dispatch({ type: 'INCREMENT_UNREAD', payload: parsed.room_id });
           }
 
-        if (state.selectedRoom && !state.selectedRoom.room_id) {
-          const newRoom = { ...state.selectedRoom, room_id: parsed.room_id };
-          console.log('new room', newRoom);
-          dispatch({ type: 'SET_SELECTED_ROOM', payload: newRoom });
-          dispatch({ type: 'SET_ROOMS', payload: [newRoom, ...state.rooms] });
-        }
+          if (state.selectedRoom && !state.selectedRoom.room_id) {
+            const newRoom = { ...state.selectedRoom, room_id: parsed.room_id };
+            console.log('new room', newRoom);
+            dispatch({ type: 'SET_SELECTED_ROOM', payload: newRoom });
+            dispatch({ type: 'SET_ROOMS', payload: [newRoom, ...state.rooms] });
+          }
       }
+    });
+
+    return () => {
+      registerMessageHandler(null);
+      clearTimeout(typingClearRef.current);
+      typingClearRef.current = null;
     }
-  }, [ws, state.selectedRoom]);
+  }, [state.selectedRoom]);
 
   return (
     <div className="chat-root">
@@ -193,15 +247,23 @@ function Chat() {
                 <li   
                   key={r.room_id}  
                   className={`chat-list-item ${state.selectedRoom?.room_id === r.room_id ? 'active' : ''}`}
-                  onClick={() => dispatch({ type: "SET_SELECTED_ROOM", payload: r })}  
+                  onClick={() => {
+                    dispatch({ type: "SET_SELECTED_ROOM", payload: r });
+                    dispatch({ type: "MARK_ROOM_READ", payload: r.room_id });
+                  }}  
                 >
                   <div className="clt-avatar-wrap">
                     <img src={r.other_user_avatar || "/avatar.jpg"} alt="John Doe" className="clt-avatar" />
-                    <span className="clt-presence-dot online" />
+                    <span className={`clt-presence-dot ${onlineUsers.has(String(r.other_user_id)) ? 'online' : ''}`} />
                   </div>
                   <div className="clt-info">
                     <div className="clt-row">
                       <span className="clt-name">{r.other_user_name}</span>
+                      {r.unread_count > 0 && (
+                        <span className="clt-unread-badge">
+                          {r.unread_count > 99 ? '99+' : r.unread_count}
+                        </span>
+                      )}
                     </div>
                     <p className="clt-preview">{r.last_message}</p>
                   </div>
@@ -232,10 +294,15 @@ function Chat() {
               <img src={state.selectedRoom.other_user_avatar || '/avatar.jpg'} alt="John Doe" className="ch-avatar" />
               <div className="ch-header-info">
                 <span className="ch-name">{state.selectedRoom.other_user_name}</span>
-                <span className="ch-status">
-                  <span className="ch-status-dot" />
-                  Active now
-                </span>
+                  <span className="ch-status">
+                    <span className="ch-status-dot" />
+                    {state.typingUserId === state.selectedRoom.other_user_id
+                      ? 'typing...'
+                      : onlineUsers.has(String(state.selectedRoom.other_user_id)) 
+                        ? 'Active now' 
+                        : 'Offline'
+                    }
+                  </span>
               </div>
               <div className="ch-header-actions">
                 <button className="ch-icon-btn"><FontAwesomeIcon icon={faPhone} /></button>
@@ -246,10 +313,24 @@ function Chat() {
 
             <div className="ch-messages" ref={messagesContainerRef}>
               <div ref={loadMoreRef} />
-              {state.roomConversation?.map((msg, i) => (
-                <div key={i} className={`ch-message ${msg.sender_id === loggedUserId ? 'ch-message-mine' : 'ch-message-theirs'}`}>
+              {state.roomConversation?.map((msg) => (
+                <div 
+                  key={msg.id} 
+                  className={`ch-message ${msg.sender_id === loggedUserId ? 'ch-message-mine' : 'ch-message-theirs'}`}
+                  onDoubleClick={() => dispatch({ type: 'SET_SELECTED_MESSAGE', payload: msg.id })}
+                >
                   <p className="ch-message-text">{msg.text}</p>
                   <span className="ch-message-time">{timeAgo(msg.created_at)}</span>
+                
+                  {state.selectedMessageIndex === msg.id && msg.sender_id === loggedUserId && (
+                    <button
+                      className='ch-delete-btn'
+                      onClick={() => onDeleteMessage(msg)}
+                    >
+                      delete
+                    </button>
+                  )}
+                
                 </div>
               ))}
               <div ref={messagesEndRef} />
@@ -263,12 +344,18 @@ function Chat() {
                   value={state.newMessage}
                   placeholder="Message..." 
                   className="ch-input" 
-                  onChange={onNewMessageInput} />
+                  onChange={onNewMessageInput}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                       onNewMessageSend(state.selectedRoom.room_id, state.selectedRoom.other_user_id)
+                    }
+                  }}
+                />
                 <button className="ch-icon-btn ch-emoji-btn">
                   <FontAwesomeIcon icon={faFaceSmile} />
                 </button>
               </div>
-              <button className="ch-send-btn" onClick={() => onNewMessageSend(state.selectedRoom.room_id, state.selectedRoom.other_user_id)}>
+              <button className="ch-send-btn" onClick={(e) => onNewMessageSend(state.selectedRoom.room_id, state.selectedRoom.other_user_id)}>
                 <FontAwesomeIcon icon={faPaperPlane} />
               </button>
             </footer> 

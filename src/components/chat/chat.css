@@ -104,7 +104,7 @@
 }
 
 .chat-list-item.active {
-  background: var(--bg-purple-soft, rgba(124, 58, 237, 0.08));
+  background: var(--bg-surface-alt, rgba(124, 58, 237, 0.08));
 }
 
 /* Avatar */
@@ -142,6 +142,7 @@
 
 .clt-row {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: baseline;
 }
@@ -153,6 +154,22 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.clt-unread-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #e53935;
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  box-shadow: 0 1px 4px rgba(229, 57, 53, 0.4);
 }
 
 .clt-preview {
@@ -298,10 +315,12 @@
 }
 
 .ch-message {
+  position: relative;
   display: flex;
   flex-direction: column;
   max-width: 68%;
   gap: 4px;
+  cursor: pointer;
 }
 
 .ch-message-theirs {
@@ -339,6 +358,24 @@
   font-size: 11px;
   color: var(--text-muted);
   padding: 0 4px;
+}
+
+.ch-delete-btn {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #e53935;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 10;
 }
 
 /* Footer */

@@ -49,6 +49,7 @@ function Feed() {
     try {
       const response = await API.get(`/skills?page=${pageNum}&limit=10`);
       const newData = response.data;
+      console.log("Fetched feed page", pageNum, newData);
       if (pageNum === 1) {
         dispatch({ type: "SET_FEED", payload: newData })
       } else {

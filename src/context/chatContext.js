@@ -2,11 +2,14 @@ export const initialState = {
   rooms: [],
   selectedRoom: null,
   roomConversation: [],
+  onlineUsers: new Set(),
   newMessage: '',
   showList: true,
   offset: 0,
   hasMore: true,
   shouldScrollBottom: false,
+  typingUserId: null,
+  selectedMessageIndex: null,
 };
 
 
@@ -46,6 +49,53 @@ export const chatReducer = (state, action) => {
 
     case 'SET_SHOW_LIST':
       return { ...state, showList: action.payload };
+  
+    case 'USER_ONLINE':
+      return {
+        ...state,
+        onlineUsers: new Set([...state.onlineUsers, String(action.payload)])
+      };
+
+    case 'USER_OFFLINE': {
+      const updated = new Set(state.onlineUsers);
+      updated.delete(String(action.payload));
+      return { ...state, onlineUsers: updated };
+    }
+
+    case 'SET_TYPING':
+      return { ...state, typingUserId: action.payload };
+
+    case 'MARK_ROOM_READ':
+      return {
+        ...state,
+        rooms: state.rooms.map(r => 
+          r.room_id === action.payload ? { ...r, unread_count: 0 } : r
+        )
+      };
+
+    case 'INCREMENT_UNREAD':
+      return {
+        ...state,
+        rooms: state.rooms.map(r =>
+          r.room_id === action.payload 
+            ? { ...r, unread_count: (r.unread_count || 0) + 1 } 
+            : r
+        )
+      };
+
+    case 'SET_SELECTED_MESSAGE':
+      // toggle off if double clicked again
+      return { 
+        ...state, 
+        selectedMessageIndex: state.selectedMessageIndex === action.payload ? null : action.payload 
+      };
+
+    case 'DELETE_MESSAGE_BY_ID':
+      return {
+        ...state,
+        roomConversation: state.roomConversation.filter(m => m.id !== action.payload),
+        selectedMessageIndex: null
+      };
   }
 };
 
