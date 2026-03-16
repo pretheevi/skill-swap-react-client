@@ -24,7 +24,7 @@ export function WSProvider({ children }) {
       `wss://insta-mirror-server.onrender.com?token=${token}`,
       `ws://localhost:8080?token=${token}`
     ]
-    const socket = new WebSocket(wsUrl[1]);
+    const socket = new WebSocket(wsUrl[0]);
 
     socket.onopen  = () => {
       console.log('✅ WS connected');
