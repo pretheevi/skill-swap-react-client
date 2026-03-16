@@ -6,7 +6,7 @@ const httpUrl = [
 ]
 
 const API = axios.create({
-  baseURL: httpUrl[0],
+  baseURL: httpUrl[1],
 });
 
 // request interceptor to add token to headers

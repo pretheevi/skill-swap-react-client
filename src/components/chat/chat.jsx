@@ -62,6 +62,7 @@ function Chat() {
       text: newMessage
     }));
     dispatch({ type: 'APPEND_MESSAGE', payload: {
+      id: `temp-${Date.now()}`,
       sender_id: loggedUserId,
       text: newMessage,
       created_at: new Date().toISOString(),
@@ -190,9 +191,10 @@ function Chat() {
           return;
         }
 
-        if (parsed.type === 'message') {        
+        if (parsed.type === 'message') {      
           if (parsed.sender_id !== loggedUserId) {
               dispatch({ type: 'APPEND_MESSAGE', payload: {
+                id: parsed.message_id,
                 sender_id: parsed.sender_id,
                 text: parsed.text,
                 created_at: new Date().toISOString(),

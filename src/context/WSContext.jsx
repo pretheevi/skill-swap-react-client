@@ -24,7 +24,7 @@ export function WSProvider({ children }) {
       `wss://insta-mirror-server.onrender.com?token=${token}`,
       `ws://localhost:8080?token=${token}`
     ]
-    const socket = new WebSocket(wsUrl[0]);
+    const socket = new WebSocket(wsUrl[1]);
 
     socket.onopen  = () => {
       console.log('✅ WS connected');
@@ -33,7 +33,6 @@ export function WSProvider({ children }) {
 
     socket.onmessage = (event) => {
       const parsed = JSON.parse(event.data);
-
       // presence handled here — always active, regardless of what's mounted
       if (parsed.type === 'presence') {
         dispatch({
