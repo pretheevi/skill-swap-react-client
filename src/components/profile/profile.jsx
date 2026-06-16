@@ -101,7 +101,7 @@ function Profile() {
 
         <div className="prf-header-row">
           <div className="prf-avatar-card">
-            <img src={profileUser?.avatar || '/avatar.jpg'} alt="avatar" />
+            <img src={profileUser?.avatar || '/avatar.jpeg'} alt="avatar" />
           </div>
 
           <div className="prf-info-card">

@@ -255,7 +255,7 @@ function Chat() {
                   }}  
                 >
                   <div className="clt-avatar-wrap">
-                    <img src={r.other_user_avatar || "/avatar.jpg"} alt="John Doe" className="clt-avatar" />
+                    <img src={r.other_user_avatar || "/avatar.jpeg"} alt="John Doe" className="clt-avatar" />
                     <span className={`clt-presence-dot ${onlineUsers.has(String(r.other_user_id)) ? 'online' : ''}`} />
                   </div>
                   <div className="clt-info">

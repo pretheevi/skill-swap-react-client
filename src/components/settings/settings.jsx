@@ -121,7 +121,7 @@ function Settings() {
               className="st-item"
               onClick={() => handleItemClick(item.id)}
             >
-              <span className="st-item-icon" style={{ background: `${item.color}18`, color: item.color }}>
+              <span className="st-item-icon" style={{ color: item.color }}>
                 <FontAwesomeIcon icon={item.id === 'theme' ? (isDark ? faSun : faMoon) : item.icon} />
               </span>
               <span className="st-item-text">
@@ -151,7 +151,7 @@ function Settings() {
               className="st-item"
               onClick={() => handleItemClick(item.id)}
             >
-              <span className="st-item-icon" style={{ background: `${item.color}18`, color: item.color }}>
+              <span className="st-item-icon" style={{ color: item.color }}>
                 <FontAwesomeIcon icon={item.icon} />
               </span>
               <span className="st-item-text">
@@ -169,7 +169,7 @@ function Settings() {
             className="st-item st-logout"
             onClick={() => dispatch({ type: 'SHOW_LOGOUT' })}
           >
-            <span className="st-item-icon" style={{ background: '#FF4D4F18', color: '#FF4D4F' }}>
+            <span className="st-item-icon" style={{ color: '#FF4D4F' }}>
               <FontAwesomeIcon icon={faArrowRightFromBracket} />
             </span>
             <span className="st-item-text">

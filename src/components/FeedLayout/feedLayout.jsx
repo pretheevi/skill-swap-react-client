@@ -6,6 +6,7 @@ import { faBell, faMessage } from '@fortawesome/free-regular-svg-icons';
 import Feed from "../feed";
 import { FeedContext, feedReducer, initialState } from '../../context/FeedContext';
 import { useReducer } from "react";
+import './feedLayout.css';
 
 function FeedLayout({ setCreatePost }) {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ function FeedLayout({ setCreatePost }) {
             </div>
 
             <button
-              className="main-header-create-post-btn d-flex justify-content-center align-items-center gap-2"
+              className="bttn d-flex justify-content-center align-items-center gap-2"
               onClick={() => setCreatePost(true)}
             >
               <FontAwesomeIcon icon={faPlus} className="main-header-plus-icon" />

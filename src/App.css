@@ -1,23 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
-/* ── reset ── */
-html, body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Poppins', system-ui, sans-serif;
-  background-color: var(--bg-surface-alt);
-  color: var(--text-primary);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-::selection {
-  background-color: var(--color-purple-500);
-  color: var(--text-on-purple);
-}
-
 /* ══════════════════════════════════════════════
    LAYOUT
 ══════════════════════════════════════════════ */
@@ -54,44 +34,21 @@ html, body {
   justify-content: flex-start;
   gap: 0;
   padding: 0;
+  background: var(--primary-bg);
   border-right: 1px solid var(--border);
-}
-
-/* logo */
-.dash-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background-color: var(--bg-pink-soft);
-  padding: 0.6rem 1rem;
-  box-shadow: var(--shadow-card);
-  flex-shrink: 0;
-}
-
-.dash-logo img {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-}
-
-.dash-logo h1 {
-  color: var(--text-primary);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  margin: 0;
+  border-right: 1px solid rgba(127,127,127,0.12);
+  box-shadow: none;    
 }
 
 /* profile card */
 .dash-profile-card {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   gap: 10px;
-  background-color: var(--bg-surface-alt);
   padding: 1rem;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background var(--transition-fast);
 }
 
 .dash-profile-card:hover {
@@ -99,11 +56,10 @@ html, body {
 }
 
 .dash-profile-avatar {
-  width: 80px;
-  height: 80px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  background-color: var(--bg-surface-alt);
   border: 3px solid var(--bg-surface-alt);
   transition: border-color var(--transition-fast);
 }
@@ -113,57 +69,14 @@ html, body {
 }
 
 .dash-profile-account-name {
-  color: var(--text-primary);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  color: var(--primary-text);
+  font-size: 1.6rem;
   margin: 0;
 }
 
 .dash-profile-username {
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
+  color: var(--secondary-text);
   margin: 0;
-}
-
-.dash-profile-info-card {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  border-top: 1px solid var(--border);
-  padding-top: 10px;
-}
-
-.profile-post-count,
-.profile-followers-count,
-.profile-following-count {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-}
-
-.profile-post-count p,
-.profile-followers-count p,
-.profile-following-count p {
-  color: var(--text-primary);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
-  margin: 0;
-}
-
-.profile-followers-count p {
-  width: 100%;
-  text-align: center;
-  border-left: 1px solid var(--border);
-  border-right: 1px solid var(--border);
-}
-
-.profile-post-count label,
-.profile-followers-count label,
-.profile-following-count label {
-  color: var(--text-muted);
-  font-size: var(--font-size-xs);
 }
 
 /* nav card */
@@ -171,7 +84,6 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  background-color: var(--bg-surface-alt);
   width: 100%;
   flex: 1;
   padding: 1rem;
@@ -187,20 +99,28 @@ html, body {
   align-items: center;
   gap: 12px;
   background-color: transparent;
-  color: var(--text-secondary);
-  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
-}
-
-.dash-navbar-item:hover {
-  background-color: var(--bg-purple-soft);
-  color: var(--accent-primary);
-  transform: translateX(3px);
+  color: var(--secondary-text);
 }
 
 .dash-navbar-item p {
   margin: 0;
-  font-size: var(--font-size-sm);
-  font-weight: 500;
+}
+
+.dash-navbar-item:hover {
+  background: linear-gradient(to right, var(--color-xp), var(--color-corporate));
+  color: var(--text-on-brand);
+}
+
+.dash-navbar-item.active {
+  background: linear-gradient(to right, var(--color-xp), var(--color-corporate));
+  color: var(--text-on-brand);
+  font-weight: var(--font-weight-medium);
+}
+
+/* keep active style on hover too */
+.dash-navbar-item.active:hover {
+  background: linear-gradient(to right, var(--color-xp), var(--color-corporate));
+  filter: brightness(1.08);
 }
 
 /* ══════════════════════════════════════════════
@@ -211,9 +131,25 @@ html, body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 0;
-  background-color: var(--bg-surface-alt);
+  padding: 0px;
+   background: linear-gradient(160deg,
+    var(--primary-bg),
+    var(--secondary-bg),
+    var(--color-purple-600),
+    var(--color-pink-700)
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 12s ease infinite;
 }
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 0%; }
+  25%  { background-position: 50% 50%; }
+  50%  { background-position: 100% 100%; }
+  75%  { background-position: 50% 50%; }
+  100% { background-position: 0% 0%; }
+}
+ 
 
 /* header */
 .main-header {
@@ -236,7 +172,7 @@ html, body {
   min-width: 200px;
   width: 400px;
   background: transparent;
-  color: var(--text-primary);
+  color: var(--primary-text);
 }
 
 .main-header-input::placeholder {
@@ -322,7 +258,7 @@ html, body {
   font-size: var(--font-size-lg);
   padding: 0;
   margin: 0;
-  color: var(--text-primary);
+  color: var(--primary-text);
 }
 
 .feed-masonry {
@@ -330,6 +266,8 @@ html, body {
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   grid-auto-rows: 8px;
   gap: 1rem;
+  padding-left: 10px;
+  padding-right: 10px;
   padding-bottom: 5rem;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -350,29 +288,11 @@ html, body {
 /* ══════════════════════════════════════════════
    FEED CARD
 ══════════════════════════════════════════════ */
-.card {
-  background-color: var(--bg-card);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  border: none;
-  box-shadow: var(--shadow-card);
-  display: flex;
-  flex-direction: column;
-  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
-}
 
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-card-hover);
-}
 
-@media (max-width: 768px) {
-  .card { border-radius: 0 !important; }
-}
 
 .card-header {
   padding: 0.75rem;
-  background-color: var(--bg-card);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -415,7 +335,7 @@ html, body {
 
 .card-footer {
   padding: 0.75rem;
-  background-color: var(--bg-card);
+  /* background-color: var(--bg-card); */
   flex-shrink: 0;
 }
 
@@ -428,18 +348,18 @@ html, body {
 .card-actions svg {
   cursor: pointer;
   font-size: var(--font-size-lg);
-  color: var(--text-secondary);
+  color: var(--secondary-text);
   transition: color var(--transition-fast), transform var(--transition-fast);
 }
 
 .card-actions svg:hover {
-  color: var(--accent-primary);
+  color: var(--accent-light) !important;
   transform: scale(1.1);
 }
 
 .card-description {
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--secondary-text) !important;
   margin-top: 6px;
 }
 
@@ -470,7 +390,7 @@ html, body {
 .sm-nav-action {
   font-size: var(--font-size-lg);
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--primary-text);
   padding: 6px;
   border-radius: var(--radius-sm);
   transition: color var(--transition-fast), background var(--transition-fast);

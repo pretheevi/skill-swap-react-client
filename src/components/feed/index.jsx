@@ -15,8 +15,8 @@ import { toast } from 'react-toastify';
 import './feed.css';
 
 const RATIO_TO_SPAN = {
-  '1:1': 20,
-  '2:3': 25,
+  '1:1': 15,
+  '2:3': 20,
 };
 
 function timeAgo(dateStr) {
@@ -129,7 +129,7 @@ function Feed() {
       {feed.length > 0 && feed.map((card) => (
         <article
           key={card.skill_id}
-          className="card"
+          className="cardd"
           style={{ gridRow: `span ${RATIO_TO_SPAN[card.media_ratio]}` }}
         >
           {/* ── card header ── */}

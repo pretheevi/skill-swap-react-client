@@ -1,0 +1,26 @@
+/* 
+.main-header-bell-icon,
+.main-header-message-icon{
+  color: var(--secondary-text);
+}
+
+.main-header-create-post-btn{
+  padding: 0.6rem 2rem;
+  background:var(--btn-bg);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  user-select: none;
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+.main-feed-card{
+  background-color: var(--secondary-bg);
+  padding: 10px;
+  border-radius: 20px;
+} */

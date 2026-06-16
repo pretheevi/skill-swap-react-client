@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -49,10 +49,13 @@ function PublicRoute({ children, isAuthenticated }) {
 // ── app ───────────────────────────────────────────────────
 function App() {
   const navigate = useNavigate();
+  const location = useLocation() 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [verifying, setVerifying] = useState(true);
   const [user, setUser] = useState(null);
   const [createPost, setCreatePost] = useState(false);
+
+  const isActive = (path) => location.pathname === path;
 
   // ── token verify on mount ──────────────────────────────
   useEffect(() => {
@@ -120,50 +123,31 @@ function App() {
                     <div className="row m-0">
 
                       {/* desktop sidebar */}
-                      <section className="bg-side-bar col-lg-3 d-none d-lg-flex">
-                        <div className="dash-logo">
-                          <img src="/logo.png" alt="logo" />
-                          <h1>Skillswap</h1>
-                        </div>
-
+                      <section className="bg-side-bar col-md-4 col-lg-3 col-xl-2 d-none d-lg-flex">
                         <div
                           className="dash-profile-card"
                           onClick={() => navigate(`/feed/profile/${user?.id}`)}
                         >
                           <img
-                            src={user?.avatar || '/avatar.jpg'}
+                            src={user?.avatar || '/avatar.jpeg'}
                             alt="profile-avatar"
                             className="dash-profile-avatar"
                           />
                           <div className="text-center">
                             <h3 className="dash-profile-account-name">{user?.name}</h3>
                           </div>
-                          <div className="dash-profile-info-card">
-                            <span className="profile-post-count">
-                              <p>{user?.posts_count || 0}</p>
-                              <label>Posts</label>
-                            </span>
-                            <span className="profile-followers-count">
-                              <p>{user?.followers_count || 0}</p>
-                              <label>Followers</label>
-                            </span>
-                            <span className="profile-following-count">
-                              <p>{user?.following_count || 0}</p>
-                              <label>Following</label>
-                            </span>
-                          </div>
                         </div>
 
                         <div className="dash-navbar-card">
-                          <div className="dash-navbar-item" onClick={() => navigate('/feed')}>
+                          <div  className={`dash-navbar-item ${isActive('/feed') ? 'active' : ''}`} onClick={() => navigate('/feed')}>
                             <FontAwesomeIcon icon={faHome} />
                             <p>Feed</p>
                           </div>
-                          <div className="dash-navbar-item" onClick={() => navigate('/feed/explore')}>
+                          <div  className={`dash-navbar-item ${isActive('/feed/explore') ? 'active' : ''}`}  onClick={() => navigate('/feed/explore')}>
                             <FontAwesomeIcon icon={faSearch} />
                             <p>Explore</p>
                           </div>
-                          <div className="dash-navbar-item" onClick={() => navigate('/feed/settings')}>
+                          <div className={`dash-navbar-item ${isActive('/feed/settings') ? 'active' : ''}`}  onClick={() => navigate('/feed/settings')}>
                             <FontAwesomeIcon icon={faGear} />
                             <p>Settings</p>
                           </div>
@@ -178,7 +162,7 @@ function App() {
                       </section>
 
                       {/* main content */}
-                      <section className="bg-main-bar col-12 col-lg-9">
+                      <section className="bg-main-bar col-12 col-lg-9 col-xl-10">
                         <Routes>
                           <Route path="/" element={<Navigate to="/feed" replace />} />
 
@@ -257,7 +241,7 @@ function App() {
                           </div>
                           <div className="sm-nav-action">
                             <img
-                              src={user?.avatar || '/avatar.jpg'}
+                              src={user?.avatar || '/avatar.jpeg'}
                               onClick={() => navigate(`/feed/profile/${user?.id}`)}
                               alt="profile-avatar"
                               className="sm-navbar-avatar"

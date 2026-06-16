@@ -159,7 +159,7 @@ function Explore() {
               >
                 <div className="explore-recent-avatar-wrap">
                   <img
-                    src={profile.avatar || '/avatar.jpg'}
+                    src={profile.avatar || '/avatar.jpeg'}
                     alt={profile.name}
                     className="explore-recent-avatar"
                     onError={(e) => { e.target.src = '/avatar.jpg'; }}

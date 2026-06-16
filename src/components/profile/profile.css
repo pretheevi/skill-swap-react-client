@@ -42,7 +42,6 @@
   border-bottom: 1px solid var(--border);
 }
 
-/* top row — avatar + info side by side */
 .prf-header-row {
   display: flex;
   flex-direction: row;
@@ -91,8 +90,8 @@
 
 .prf-info-account-name {
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--primary-text);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -105,11 +104,11 @@
   margin: 0;
 }
 
-/* icons (gear + logout) */
+/* icons */
 .prf-info-icons {
   display: flex;
   gap: 14px;
-  color: var(--text-secondary);
+  color: var(--secondary-text);
   font-size: 15px;
   flex-shrink: 0;
 }
@@ -120,7 +119,7 @@
 }
 
 .prf-info-icons svg:hover {
-  color: var(--text-primary);
+  color: var(--primary-text);
 }
 
 /* ── stats row ── */
@@ -157,8 +156,8 @@
   padding: 0;
   margin: 0;
   font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--primary-text);
   line-height: 1.3;
 }
 
@@ -167,7 +166,7 @@
   padding: 0;
   margin: 2px 0 0;
   font-size: var(--font-size-xs);
-  color: var(--text-muted);
+  color: var(--secondary-text);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
@@ -184,7 +183,7 @@
   border-radius: 20px;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform var(--transition-base);
+  transition: transform var(--transition-fast);
 }
 
 .prf-count-item:hover > p::after {
@@ -199,7 +198,7 @@
 .prf-bio-card p,
 .prf-bio {
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--secondary-text);
   line-height: 1.6;
   margin: 0;
 }
@@ -220,12 +219,12 @@
   font-weight: var(--font-weight-medium);
   border: none;
   cursor: pointer;
-  transition: transform var(--transition-fast), box-shadow var(--transition-base), background var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
 }
 
 .message-btn {
-  background-color: var(--bg-surface-alt);
-  color: var(--text-primary);
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
 }
 
 .message-btn:hover {
@@ -234,23 +233,25 @@
 }
 
 .follow-btn {
-  background: linear-gradient(135deg, var(--color-purple-500), var(--color-purple-600));
-  color: var(--text-on-purple);
+  background: var(--gradient-brand);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(144,19,254,0.3);
 }
 
 .follow-btn:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-card-hover);
-  filter: brightness(1.05);
+  box-shadow: 0 6px 20px rgba(0,143,236,0.35);
+  filter: brightness(1.08);
 }
 
 .follow-btn.following {
   background: var(--bg-surface-alt);
-  color: var(--text-primary);
+  color: var(--primary-text);
+  box-shadow: none;
 }
 
 /* ══════════════════════════════
-   POST GRID  — uses .prf-post-card NOT .prf-card
+   POST GRID
 ══════════════════════════════ */
 .prf-feed-container {
   padding: 0;
@@ -263,7 +264,6 @@
   padding-bottom: 10rem;
 }
 
-/* post tile — intentionally different class from .prf-card */
 .prf-post-card {
   cursor: pointer;
   overflow: hidden;
@@ -298,13 +298,13 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0);
+  background: rgba(0,0,0,0);
   transition: background var(--transition-fast);
   pointer-events: none;
 }
 
 .prf-post-card:hover::after {
-  background: rgba(0, 0, 0, 0.18);
+  background: rgba(0,0,0,0.18);
 }
 
 .skill-liked-icon {
@@ -315,20 +315,8 @@
    RESPONSIVE
 ══════════════════════════════ */
 @media (max-width: 768px) {
-  .main-profile-container {
-    padding: 0;
-  }
-
-  .prf-container {
-    padding: 14px 14px;
-  }
-
-  .prf-avatar-card {
-    width: 68px;
-    height: 68px;
-  }
-
-  .prf-feed-masonry {
-    gap: 1px;
-  }
+  .main-profile-container { padding: 0; }
+  .prf-container { padding: 14px; }
+  .prf-avatar-card { width: 68px; height: 68px; }
+  .prf-feed-masonry { gap: 1px; }
 }

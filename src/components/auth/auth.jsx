@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar } from '@fortawesome/free-solid-svg-icons';
 import API from '../api/api';
 import { toast } from 'react-toastify';
-import './wallpaper.css';
 import './auth.css';
 
 function Auth(props) {
@@ -114,64 +113,34 @@ function Auth(props) {
   };
 
   return (
-    <div className="container-fluid p-0">
-      <div className="row auth-row m-0">
-
-        {/* ── left: animated wallpaper ── */}
-        <div className="col-6 auth-card d-none d-lg-block">
-          <div className="auth-wallpaper" ref={wallpaperRef}>
-            <svg xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <filter id="goo-auth">
-                  <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-                  <feColorMatrix
-                    in="blur" mode="matrix"
-                    values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"
-                    result="goo"
-                  />
-                  <feBlend in="SourceGraphic" in2="goo" />
-                </filter>
-              </defs>
-            </svg>
-
-            <div className="auth-gradients">
-              <div className="g1" />
-              <div className="g2" />
-              <div className="g3" />
-              <div className="g4" />
-              <div className="g5" />
-              <div className="interactive" />
-            </div>
-
-            <div className="auth-content-overlap">
-              <div className="star-container">
-                <FontAwesomeIcon icon={faStar} className="faStar" />
-                <span className="auth-brand-name">Skillswap</span>
-              </div>
-              <div className="text-container">
-                <p>Skill swap everyday</p>
-                <h1>Share your skills with the world. Get inspired. Learn from others.</h1>
-              </div>
-            </div>
-          </div>
+    <div className="auth-bg-container">
+      <div className="wallpaper-container">
+        <div className="wallpaper-card">
+          <h1 className='wallpp-h1 lg-heading'>Where Conversations Matter.</h1>
+          <h1 className='wallpp-h1 lg-heading'>Not Just Numbers.</h1>
+          <p className='wallpp-p'>
+            A social experience built for authentic connections,
+            thoughtful discussions, and lasting communities.
+          </p>
         </div>
-
-        {/* ── right: forms ── */}
-        <div className="col-12 col-lg-6 auth-card">
-
+      </div>
+      <div className="auth-continer">
+        <div className="auth-card">
           {/* register form */}
-          <form
-            className={`auth-form register ${redirect.register ? 'show' : ''}`}
+          {redirect.register && <form
+            className="auth-form"
             onSubmit={handleRegisterSubmit}
           >
-            <h1 className="auth-heading">Create account</h1>
-            <p className="auth-subheading">Join a community of learners and educators</p>
-
+            <div>
+              <h1 className="auth-heading lg-heading">Create account</h1>
+              <p className="auth-subheading mt-3">Join a community of learners and educators</p>
+            </div>
             <div className="form-group">
-              <label htmlFor="reg-username">Username</label>
+              <label className="label"  htmlFor="reg-username">Username</label>
               <input
                 type="text"
                 id="reg-username"
+                className='input'
                 placeholder="Your username"
                 name="name"
                 value={form.name}
@@ -182,10 +151,11 @@ function Auth(props) {
             </div>
 
             <div className="form-group">
-              <label htmlFor="reg-email">Email</label>
+              <label className="label"  htmlFor="reg-email">Email</label>
               <input
                 type="email"
                 id="reg-email"
+                className='input'
                 placeholder="you@example.com"
                 name="email"
                 value={form.email}
@@ -194,37 +164,39 @@ function Auth(props) {
                 autoComplete="email"
               />
             </div>
+            <div className='d-flex gap-2'>
+              <div className="form-group flex-grow-1">
+                <label className="label"  htmlFor="reg-password">Password</label>
+                <input
+                  type="password"
+                  id="reg-password"
+                  className='input'
+                  placeholder="Create a password"
+                  name="password"
+                  value={form.password}
+                  onChange={handleInputChange}
+                  required
+                  autoComplete="new-password"
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="reg-password">Password</label>
-              <input
-                type="password"
-                id="reg-password"
-                placeholder="Create a password"
-                name="password"
-                value={form.password}
-                onChange={handleInputChange}
-                required
-                autoComplete="new-password"
-              />
+              <div className="form-group flex-grow-1">
+                <label className="label"  htmlFor="reg-confirm-password">Confirm password</label>
+                <input
+                  type="password"
+                  id="reg-confirm-password"
+                  className='input'
+                  placeholder="Repeat your password"
+                  name="confirmPassword"
+                  value={form.confirmPassword}
+                  onChange={handleInputChange}
+                  required
+                  autoComplete="new-password"
+                />
+              </div>
             </div>
-
-            <div className="form-group">
-              <label htmlFor="reg-confirm-password">Confirm password</label>
-              <input
-                type="password"
-                id="reg-confirm-password"
-                placeholder="Repeat your password"
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleInputChange}
-                required
-                autoComplete="new-password"
-              />
-            </div>
-
             <div className="form-btn">
-              <button type="submit" disabled={loading}>
+              <button type="submit" disabled={loading} className='bttn'>
                 {loading ? (
                   <>
                     <span className="btn-spinner" />
@@ -233,29 +205,32 @@ function Auth(props) {
                 ) : 'Sign Up'}
               </button>
             </div>
-
-            <div className="form-divider"><span>already a member?</span></div>
-
-            <div className="form-redirect">
-              <p>
-                <span onClick={() => handleRedirect('login')}>Log in to your account</span>
-              </p>
+            
+            <div>
+              <div className="form-divider text-secondary"><span>already a member?</span></div>
+              <div className="form-redirect mt-3">
+                <p className='link'>
+                  <span onClick={() => handleRedirect('login')}>Log in to your account</span>
+                </p>
+              </div>
             </div>
-          </form>
-
+          </form>}
           {/* login form */}
-          <form
-            className={`auth-form login ${redirect.login ? 'show' : ''}`}
+          {redirect.login && <form
+            className="auth-form"
             onSubmit={handleLoginSubmit}
           >
-            <h1 className="auth-heading">Welcome back</h1>
-            <p className="auth-subheading">Log in to your Skillswap account</p>
+            <div>
+              <h1 className="auth-heading lg-heading">Welcome back</h1>
+              <p className="auth-subheading">Log in to your Skillswap account</p>
+            </div>
 
             <div className="form-group">
-              <label htmlFor="login-email">Email</label>
+              <label className="label" htmlFor="login-email">Email</label>
               <input
                 type="email"
                 id="login-email"
+                className='input'
                 placeholder="you@example.com"
                 name="email"
                 value={form.email}
@@ -266,10 +241,11 @@ function Auth(props) {
             </div>
 
             <div className="form-group">
-              <label htmlFor="login-password">Password</label>
+              <label className="label" htmlFor="login-password">Password</label>
               <input
                 type="password"
                 id="login-password"
+                className='input'
                 placeholder="Your password"
                 name="password"
                 value={form.password}
@@ -280,7 +256,7 @@ function Auth(props) {
             </div>
 
             <div className="form-btn">
-              <button type="submit" disabled={loading}>
+              <button type="submit" disabled={loading} className='bttn'>
                 {loading ? (
                   <>
                     <span className="btn-spinner" />
@@ -290,15 +266,15 @@ function Auth(props) {
               </button>
             </div>
 
-            <div className="form-divider"><span>new here?</span></div>
-
-            <div className="form-redirect">
-              <p>
-                <span onClick={() => handleRedirect('register')}>Create an account</span>
-              </p>
+            <div>
+              <div className="form-divider text-secondary"><span>new here?</span></div>
+              <div className="form-redirect mt-3">
+                <p className='link'>
+                  <span onClick={() => handleRedirect('register')}>Create an account</span>
+                </p>
+              </div>       
             </div>
-          </form>
-
+          </form>}
         </div>
       </div>
     </div>
